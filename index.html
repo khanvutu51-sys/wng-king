@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wingo Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;font-family:Roboto}
+body{
+margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;
+background:linear-gradient(-45deg,#0f2027,#203a43,#2c5364,#141e30);
+background-size:400% 400%;animation:bg 12s ease infinite
+}
+@keyframes bg{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+
+.page{
+display:none;width:100%;max-width:440px;padding:22px;border-radius:22px;
+background:rgba(255,255,255,.15);backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,.3);color:#fff
+}
+h2{text-align:center;margin-bottom:12px}
+input,button,select{
+width:100%;padding:12px;margin-top:10px;border-radius:14px;border:none;font-size:15px
+}
+button{cursor:pointer;font-weight:600}
+.primary{background:#00c6ff;color:#fff}
+.secondary{background:#444;color:#fff}
+.server{height:70px;font-size:18px;border-radius:40px;margin-top:14px}
+.hgzy{background:#0575e6}
+.dkwin{background:#f7971e}
+
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.stat div{background:#fff;color:#000;padding:8px;border-radius:10px;text-align:center}
+.bar{height:16px;border-radius:10px;margin-top:6px}
+.winbar{background:#38a169}
+.lossbar{background:#e53e3e}
+
+#history div{padding:6px;border-radius:8px;margin:5px 0;text-align:center;color:#fff}
+.win{background:#38a169}
+.loss{background:#e53e3e}
+.small{font-size:13px;opacity:.9}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="page" id="login" style="display:block">
+<h2 id="title">Login</h2>
+<input id="liUser" placeholder="Username / Mobile">
+<div style="position:relative">
+<input id="liPass" type="password" placeholder="Password">
+<span onclick="togglePass('liPass',this)" style="position:absolute;right:12px;top:14px;color:#000;cursor:pointer">Show</span>
+</div>
+<button class="primary" onclick="login()">Login</button>
+<button class="secondary" onclick="showPage('signup')">Signup</button>
+<p id="lmsg"></p>
+</div>
+
+<!-- SIGNUP -->
+<div class="page" id="signup">
+<h2>Signup</h2>
+<input id="suName" placeholder="Full Name">
+<input id="suUser" placeholder="Username">
+<input id="suEmail" placeholder="Email">
+<input id="suMobile" placeholder="Mobile">
+<div style="position:relative">
+<input id="suPass" type="password" placeholder="Password">
+<span onclick="togglePass('suPass',this)" style="position:absolute;right:12px;top:14px;color:#000">Show</span>
+</div>
+<div style="position:relative">
+<input id="suCPass" type="password" placeholder="Confirm Password">
+<span onclick="togglePass('suCPass',this)" style="position:absolute;right:12px;top:14px;color:#000">Show</span>
+</div>
+<button class="primary" onclick="signup()">Signup</button>
+<button class="secondary" onclick="showPage('login')">Back</button>
+<p id="smsg"></p>
+</div>
+
+<!-- SERVER -->
+<div class="page" id="server">
+<h2>Select Server</h2>
+<button class="server hgzy" onclick="selectServer('HGZY')">HGZY SERVER</button>
+<button class="server dkwin" onclick="selectServer('DKWIN')">DKWIN SERVER</button>
+<button class="secondary" onclick="logout()">Logout</button>
+</div>
+
+<!-- GAME -->
+<div class="page" id="game">
+<h2 id="serverTitle"></h2>
+
+<input id="num" maxlength="1" placeholder="0-9">
+<button id="resultBtn" class="primary" onclick="generateResult()">Show Result</button>
+
+<p id="resultText"></p>
+<p id="timer"></p>
+
+<div class="stat">
+<div id="wC">Win: 0</div>
+<div id="lC">Loss: 0</div>
+<div id="wP">Win%: 0</div>
+<div id="lP">Loss%: 0</div>
+</div>
+
+<div class="bar winbar" id="winBar"></div>
+<div class="bar lossbar" id="lossBar"></div>
+
+<p class="small" id="streakInfo"></p>
+
+<button class="primary" onclick="addResult('Win')">Win</button>
+<button class="secondary" onclick="addResult('Loss')">Loss</button>
+
+<div id="history"></div>
+
+<button class="secondary" onclick="clearHistory()">Clear History</button>
+<button class="secondary" onclick="showPage('server')">Back</button>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="page" id="adminLogin">
+<h2>Admin Login</h2>
+<input id="adUser" placeholder="Admin User">
+<input id="adPass" type="password" placeholder="Password">
+<button class="primary" onclick="adminLogin()">Login</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="page" id="admin">
+<h2>Admin Panel</h2>
+<label>Lock Time (sec)</label>
+<input id="lockInput" type="number" min="5" max="60">
+<label>Bias Mode</label>
+<select id="biasInput">
+<option value="neutral">Neutral</option>
+<option value="big">Soft Big</option>
+<option value="small">Soft Small</option>
+</select>
+<p>🔒 Demo Only</p>
+<button class="primary" onclick="saveAdmin()">Save</button>
+<button class="secondary" onclick="resetAll()">Reset All</button>
+<button class="secondary" onclick="showPage('login')">Exit</button>
+</div>
+
+<script>
+/* ---------- GLOBAL STATE ---------- */
+let tapCount=0,lock=false,timerInt;
+let server="";
+let data=JSON.parse(localStorage.getItem("data"))||{};
+let admin=JSON.parse(localStorage.getItem("admin"))||{lock:15,bias:"neutral"};
+
+title.onclick=()=>{tapCount++;if(tapCount===5)showPage('adminLogin')}
+
+/* ---------- UTILS ---------- */
+function showPage(id){
+document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+document.getElementById(id).style.display='block';
+}
+function togglePass(id,el){
+let i=document.getElementById(id);
+i.type=i.type==="password"?"text":"password";
+el.innerText=i.type==="password"?"Show":"Hide";
+}
+
+/* ---------- AUTH ---------- */
+function signup(){
+if(suPass.value!==suCPass.value){smsg.innerText="Password mismatch";return}
+localStorage.setItem("user",JSON.stringify({
+name:suName.value,user:suUser.value,email:suEmail.value,
+mobile:suMobile.value,pass:suPass.value
+}));
+smsg.innerText="Signup successful";
+setTimeout(()=>showPage('login'),800);
+}
+function login(){
+let u=JSON.parse(localStorage.getItem("user"));
+if(!u||liPass.value!==u.pass){lmsg.innerText="Invalid login";return}
+showPage('server');
+}
+function logout(){showPage('login')}
+
+/* ---------- SERVER ---------- */
+function selectServer(s){
+server=s;
+if(!data[s])data[s]=[];
+serverTitle.innerText=s+" SERVER";
+showPage('game');
+render();
+}
+
+/* ---------- RESULT ENGINE (SBRG) ---------- */
+function generateResult(){
+if(lock)return;
+if(num.value===""||num.value<0||num.value>9){alert("0-9 দিন");return}
+
+let r;
+if(admin.bias==="neutral") r=Math.random()<0.5?"Small":"Big";
+if(admin.bias==="big") r=Math.random()<0.6?"Big":"Small";
+if(admin.bias==="small") r=Math.random()<0.6?"Small":"Big";
+
+resultText.innerText="Result: "+r;
+startLock();
+}
+
+/* ---------- HARD LOCK ---------- */
+function startLock(){
+lock=true;
+let t=admin.lock;
+resultBtn.disabled=true;
+num.disabled=true;
+document.querySelectorAll("#game button").forEach(b=>b.disabled=true);
+
+timer.innerText="Wait: "+t+"s";
+timerInt=setInterval(()=>{
+t--;
+timer.innerText="Wait: "+t+"s";
+if(t<=0){
+clearInterval(timerInt);
+lock=false;
+resultBtn.disabled=false;
+num.disabled=false;
+document.querySelectorAll("#game button").forEach(b=>b.disabled=false);
+timer.innerText="";
+}},1000);
+}
+
+/* ---------- STATS ---------- */
+function addResult(v){
+data[server].unshift(v);
+localStorage.setItem("data",JSON.stringify(data));
+render();
+}
+
+function render(){
+let h=data[server];
+let w=h.filter(x=>x==="Win").length;
+let l=h.length-w;
+wC.innerText="Win: "+w;
+lC.innerText="Loss: "+l;
+wP.innerText="Win%: "+(h.length?(w/h.length*100).toFixed(1):0);
+lP.innerText="Loss%: "+(h.length?(l/h.length*100).toFixed(1):0);
+winBar.style.width=(h.length?(w/h.length*100):0)+"%";
+lossBar.style.width=(h.length?(l/h.length*100):0)+"%";
+history.innerHTML=h.map(x=>`<div class="${x==='Win'?'win':'loss'}">${x}</div>`).join("");
+
+let streak=0,type="";
+for(let i=0;i<h.length;i++){
+if(i===0||h[i]===h[i-1]){type=h[i];streak++}else break;
+}
+streakInfo.innerText=type?`Back-to-Back ${type}: ${streak}`:"";
+}
+
+function clearHistory(){
+if(confirm("Clear history?")){
+data[server]=[];
+localStorage.setItem("data",JSON.stringify(data));
+render();
+}
+}
+
+/* ---------- ADMIN ---------- */
+function adminLogin(){
+if(adUser.value==="admin"&&adPass.value==="admin123"){
+lockInput.value=admin.lock;
+biasInput.value=admin.bias;
+showPage('admin');
+}
+}
+function saveAdmin(){
+admin.lock=parseInt(lockInput.value)||15;
+admin.bias=biasInput.value;
+localStorage.setItem("admin",JSON.stringify(admin));
+alert("Admin settings saved");
+}
+function resetAll(){
+if(confirm("Reset everything?")){
+localStorage.clear();
+location.reload();
+}
+}
+</script>
+
+</body>
+</html>
