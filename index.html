@@ -202,7 +202,8 @@ function generateResult(){
     let result = Math.random() < 0.5 ? "Small" : "Big";
 
     resultText.innerText = "Input: " + num.value + " → Result: " + result;
-  }
+}
+
     // House Edge Calculation
     let history = data[server];
     let w = history.filter(x=>x==="Win").length;
