@@ -193,41 +193,15 @@ render();
 
 function generateResult(){
 
-    if(num.value === "" || num.value < 0 || num.value > 9){
-        alert("0-9 দিন");
-        return;
-    }
-
-    // Totally Random Small/Big
-    let result = Math.random() < 0.5 ? "Small" : "Big";
-
-    resultText.innerText = "Input: " + num.value + " → Result: " + result;
-}
-
-    // House Edge Calculation
-    let history = data[server];
-    let w = history.filter(x=>x==="Win").length;
-    let l = history.length - w;
-
-    let winRate = history.length ? w/history.length : 0.5;
-
-    let houseEdge = 0.05; // 5% edge
-
-    if(winRate > 0.6){ 
-        // বেশি জিতলে একটু হার বাড়বে
-        if(Math.random() < houseEdge){
-            result = result==="Small" ? "Big" : "Small";
-        }
+    if(num.value === "" || num.value < 0 || num.value > 9){
+        alert("0-9 দিন");
+        return;
     }
 
-    if(winRate < 0.4){
-        // বেশি হারলে একটু win বাড়বে
-        if(Math.random() < houseEdge){
-            result = result;
-        }
-    }
+    // Totally Random Small/Big
+    let result = Math.random() < 0.5 ? "Small" : "Big";
 
-    resultText.innerText="Result: "+result;
+    resultText.innerText = "Input: " + num.value + " → Result: " + result;
 }
 
 /* ---------- HARD LOCK ---------- */
@@ -309,4 +283,4 @@ location.reload();
 </script>
 
 </body>
-</html>
+                         </html>
