@@ -190,26 +190,20 @@ render();
 }
 
 /* ---------- AUTO RESULT ENGINE ---------- */
+/* ---------- RANDOM RESULT ENGINE ---------- */
 
-let autoInterval;
-let roundTime = 10; // প্রতি 10 সেকেন্ডে রাউন্ড
+function generateResult(){
 
-function startAuto(){
-    autoInterval = setInterval(()=>{
-        processRound();
-    }, roundTime*1000);
-}
+    if(num.value === "" || num.value < 0 || num.value > 9){
+        alert("0-9 দিন");
+        return;
+    }
 
-function processRound(){
+    // Totally Random Small/Big
+    let result = Math.random() < 0.5 ? "Small" : "Big";
 
-    if(num.value==="" || num.value<0 || num.value>9){
-        resultText.innerText="Enter 0-9";
-        return;
-    }
-
-    let number = parseInt(num.value);
-    let result = number <=4 ? "Small" : "Big";
-
+    resultText.innerText = "Input: " + num.value + " → Result: " + result;
+  }
     // House Edge Calculation
     let history = data[server];
     let w = history.filter(x=>x==="Win").length;
