@@ -189,18 +189,51 @@ showPage('game');
 render();
 }
 
-/* ---------- RESULT ENGINE (SBRG) ---------- */
-function generateResult(){
-if(lock)return;
-if(num.value===""||num.value<0||num.value>9){alert("0-9 দিন");return}
+/* ---------- AUTO RESULT ENGINE ---------- */
 
-let r;
-if(admin.bias==="neutral") r=Math.random()<0.5?"Small":"Big";
-if(admin.bias==="big") r=Math.random()<0.6?"Big":"Small";
-if(admin.bias==="small") r=Math.random()<0.6?"Small":"Big";
+let autoInterval;
+let roundTime = 10; // প্রতি 10 সেকেন্ডে রাউন্ড
 
-resultText.innerText="Result: "+r;
-startLock();
+function startAuto(){
+    autoInterval = setInterval(()=>{
+        processRound();
+    }, roundTime*1000);
+}
+
+function processRound(){
+
+    if(num.value==="" || num.value<0 || num.value>9){
+        resultText.innerText="Enter 0-9";
+        return;
+    }
+
+    let number = parseInt(num.value);
+    let result = number <=4 ? "Small" : "Big";
+
+    // House Edge Calculation
+    let history = data[server];
+    let w = history.filter(x=>x==="Win").length;
+    let l = history.length - w;
+
+    let winRate = history.length ? w/history.length : 0.5;
+
+    let houseEdge = 0.05; // 5% edge
+
+    if(winRate > 0.6){ 
+        // বেশি জিতলে একটু হার বাড়বে
+        if(Math.random() < houseEdge){
+            result = result==="Small" ? "Big" : "Small";
+        }
+    }
+
+    if(winRate < 0.4){
+        // বেশি হারলে একটু win বাড়বে
+        if(Math.random() < houseEdge){
+            result = result;
+        }
+    }
+
+    resultText.innerText="Result: "+result;
 }
 
 /* ---------- HARD LOCK ---------- */
