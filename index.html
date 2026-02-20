@@ -193,15 +193,21 @@ render();
 
 function generateResult(){
 
-    if(num.value === "" || num.value < 0 || num.value > 9){
-        alert("0-9 দিন");
-        return;
-    }
+    if(lock) return;
 
-    // Totally Random Small/Big
-    let result = Math.random() < 0.5 ? "Small" : "Big";
+    if(num.value === "" || num.value < 0 || num.value > 9){
+        alert("0-9 দিন");
+        return;
+    }
 
-    resultText.innerText = "Input: " + num.value + " → Result: " + result;
+    // Random Small/Big
+    let result = Math.random() < 0.5 ? "Small" : "Big";
+
+    resultText.innerText =
+        "Input: " + num.value +
+        " → Result: " + result;
+
+    startLock(); // 🔒 Lock start
 }
 
 /* ---------- HARD LOCK ---------- */
@@ -283,4 +289,4 @@ location.reload();
 </script>
 
 </body>
-                         </html>
+  </html>
