@@ -193,21 +193,59 @@ render();
 
 function generateResult(){
 
-    if(lock) return;
+    if(lock) return;
 
-    if(num.value === "" || num.value < 0 || num.value > 9){
-        alert("0-9 দিন");
-        return;
-    }
+    if(num.value === "" || num.value < 0 || num.value > 9){
+        alert("0-9 দিন");
+        return;
+    }
 
-    // Random Small/Big
-    let result = Math.random() < 0.5 ? "Small" : "Big";
+    // Random Small/Big
+    let result = Math.random() < 0.5 ? "Small" : "Big";
 
-    resultText.innerText =
-        "Input: " + num.value +
-        " → Result: " + result;
+    resultText.innerText =
+        "Input: " + num.value +
+        " → Result: " + result;
 
-    startLock(); // 🔒 Lock start
+    startLock(); // 🔒 Lock start
+}
+function startLock(){
+
+    lock = true;
+
+    let t = admin.lock || 15;
+
+    // Disable everything except timer text
+    document.querySelectorAll("#game button").forEach(b=>{
+        b.disabled = true;
+    });
+
+    num.disabled = true;
+
+    timer.innerText = "Wait: " + t + "s";
+
+    timerInt = setInterval(()=>{
+
+        t--;
+        timer.innerText = "Wait: " + t + "s";
+
+        if(t <= 0){
+
+            clearInterval(timerInt);
+
+            lock = false;
+
+            document.querySelectorAll("#game button").forEach(b=>{
+                b.disabled = false;
+            });
+
+            num.disabled = false;
+
+            timer.innerText = "";
+
+        }
+
+    },1000);
 }
 
 /* ---------- HARD LOCK ---------- */
@@ -289,4 +327,4 @@ location.reload();
 </script>
 
 </body>
-  </html>
+    </html>
