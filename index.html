@@ -3,160 +3,364 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultra Pro Analyzer v2</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Wingo Analyzer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-body{margin:0;font-family:Arial;background:linear-gradient(135deg,#141e30,#243b55);display:flex;justify-content:center;align-items:center;height:100vh;color:white;}
-.container{width:460px;background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;backdrop-filter:blur(15px);}
-input,button{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;font-size:14px;}
-button{cursor:pointer;font-weight:bold;}
-.primary{background:#00c6ff;color:white;}
-.secondary{background:#444;color:white;}
-.stat{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px;}
-.stat div{background:white;color:black;padding:5px;border-radius:6px;text-align:center;}
-#history div{margin:4px 0;padding:4px;border-radius:5px;text-align:center;}
-.win{background:#38a169;}
-.loss{background:#e53e3e;}
-#rolling{font-size:22px;text-align:center;margin-top:10px;}
+*{
+box-sizing:border-box;
+font-family:'Roboto',sans-serif;
+-webkit-tap-highlight-color:transparent
+}
+
+body{
+margin:0;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:12px;
+background:linear-gradient(-45deg,
+#0f2027,
+#203a43,
+#2c5364,
+#141e30,
+#243b55);
+background-size:500% 500%;
+animation:bgMove 14s ease infinite;
+}
+
+@keyframes bgMove{
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:0% 50%}
+}
+
+/* GLASS CARD */
+.page{
+display:none;
+width:100%;
+max-width:440px;
+padding:22px;
+border-radius:22px;
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,0.25);
+box-shadow:
+0 0 30px rgba(0,255,255,0.15),
+0 20px 40px rgba(0,0,0,.45);
+animation:fadeUp .5s ease;
+}
+
+@keyframes fadeUp{
+from{opacity:0;transform:translateY(20px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+h2{
+text-align:center;
+margin-bottom:15px;
+color:#fff;
+text-shadow:0 0 8px rgba(0,255,255,.6)
+}
+
+input,button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:14px;
+font-size:15px;
+outline:none;
+}
+
+input{
+border:none;
+background:rgba(255,255,255,0.9);
+}
+
+button{
+border:none;
+font-weight:600;
+cursor:pointer;
+transition:.3s;
+}
+
+/* BUTTONS */
+.btn-primary{
+background:linear-gradient(135deg,#00c6ff,#0072ff);
+color:#fff;
+box-shadow:0 0 12px rgba(0,198,255,.6)
+}
+
+.btn-primary:hover{
+transform:scale(1.04);
+box-shadow:0 0 20px rgba(0,198,255,1)
+}
+
+.btn-secondary{
+background:linear-gradient(135deg,#555,#222);
+color:#fff;
+}
+
+.center{
+text-align:center;
+color:#fff;
+}
+
+/* SERVER BUTTONS */
+.server-btn{
+height:72px;
+border-radius:50px;
+font-size:18px;
+margin-top:16px;
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+box-shadow:0 0 25px rgba(0,0,0,.5);
+transition:.3s;
+}
+
+.server-btn:hover{
+transform:scale(1.05);
+}
+
+.hgzy{background:linear-gradient(135deg,#00f260,#0575e6)}
+.dkwin{background:linear-gradient(135deg,#f7971e,#ffd200)}
+
+/* STATS */
+.stat{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+margin-top:12px;
+}
+
+.stat div{
+background:rgba(255,255,255,0.9);
+padding:8px;
+border-radius:10px;
+text-align:center;
+font-weight:600;
+}
+
+/* HISTORY */
+#history{
+max-height:150px;
+overflow:auto;
+margin-top:12px;
+}
+
+#history div{
+padding:6px;
+border-radius:8px;
+color:#fff;
+margin-bottom:6px;
+text-align:center;
+}
+
+.chart{margin-top:12px}
+.bar{height:18px;border-radius:10px;margin-top:6px}
+.win{background:#38a169}
+.loss{background:#e53e3e}
+
+#timer{
+color:#ffeb3b;
+font-weight:bold;
+text-align:center;
+margin-top:8px;
+text-shadow:0 0 8px rgba(255,235,59,.8)
+}
 </style>
 </head>
+
 <body>
-<div class="container">
-<h3>Ultra Pro Analyzer v2</h3>
+
+<!-- SIGNUP -->
+<div class="page" id="page1">
+<h2>Signup</h2>
+
+<input id="suName" placeholder="Full Name">
+<input id="suUser" placeholder="Username">
+<input id="suEmail" type="email" placeholder="Email">
+<input id="suMobile" type="tel" placeholder="Mobile Number">
+
+<div style="position:relative">
+<input id="suPass" type="password" placeholder="Password">
+<span onclick="togglePass('suPass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#000">Show</span>
+</div>
+
+<div style="position:relative">
+<input id="suCPass" type="password" placeholder="Confirm Password">
+<span onclick="togglePass('suCPass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#000">Show</span>
+</div>
+
+<button class="btn-primary" onclick="signup()">Signup</button>
+<button class="btn-secondary" onclick="goToPage(4)">Back to Login</button>
+<p id="msg1" class="center"></p>
+</div>
+
+<!-- LOGIN -->
+<div class="page" id="page4" style="display:block">
+<h2>Login</h2>
+<input id="liUser" placeholder="Username or Mobile">
+
+<div style="position:relative">
+<input id="liPass" type="password" placeholder="Password">
+<span onclick="togglePass('liPass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#000">Show</span>
+</div>
+
+<button class="btn-primary" onclick="login()">Login</button>
+<button class="btn-secondary" onclick="goToPage(1)">Signup</button>
+<p id="msg2" class="center"></p>
+</div>
+
+<!-- MAIN -->
+<div class="page" id="page2">
+<h2>Select Server</h2>
+<button class="server-btn hgzy" onclick="selectServer('HGZY')">HGZY GAME SERVER</button>
+<button class="server-btn dkwin" onclick="selectServer('DKWIN')">DKWIN GAME SERVER</button>
+<button class="btn-secondary" onclick="logout()">Logout</button>
+</div>
+
+<!-- RESULT -->
+<div class="page" id="page3">
+<h2 id="serverTitle"></h2>
 
 <input id="num" maxlength="1" placeholder="0-9">
-<p id="rolling"></p>
-<p id="timer"></p>
+<button id="resBtn" class="btn-primary" onclick="showResult()">Show Result</button>
+
+<div id="numberText" class="center"></div>
+<div id="resultText" class="center"></div>
+<div id="timer"></div>
 
 <div class="stat">
 <div id="wC">Win: 0</div>
 <div id="lC">Loss: 0</div>
+<div id="wP">Win %: 0%</div>
+<div id="lP">Loss %: 0%</div>
 </div>
 
-<p id="streak"></p>
+<div class="chart">
+<div class="bar win" id="winBar"></div>
+<div class="bar loss" id="lossBar"></div>
+</div>
+
+<button class="btn-primary" onclick="add('Win')">Win</button>
+<button class="btn-secondary" onclick="add('Loss')">Loss</button>
+
 <div id="history"></div>
-<div id="chartContainer">
-<canvas id="chart"></canvas>
-</div>
 
-<hr>
-<h4>Admin Settings</h4>
-<label>Round Lock Time (sec)</label>
-<input id="lockTime" type="number" value="10">
-
-<label>Small Probability (%)</label>
-<input id="prob" type="number" value="50">
-
-<label>Auto Round Interval (sec)</label>
-<input id="interval" type="number" value="5">
-
-<button class="primary" onclick="saveAdmin()">Save Settings</button>
-<button class="secondary" onclick="clearHistory()">Clear History</button>
-
+<button class="btn-secondary" onclick="clearHistory()">Clear History</button>
+<button class="btn-secondary" onclick="goToPage(2)">Back</button>
 </div>
 
 <script>
-let lock=false;
-let timerInt,rollingInt;
-let data=JSON.parse(localStorage.getItem("data"))||[];
-let admin=JSON.parse(localStorage.getItem("admin"))||{lock:10,prob:50,interval:5};
-lockTime.value=admin.lock;
-prob.value=admin.prob;
-interval.value=admin.interval;
+let user=JSON.parse(localStorage.getItem("user"));
+let data=JSON.parse(localStorage.getItem("serverData"))||{};
+let server="",lock=false,timerI;
 
-const ctx=document.getElementById('chart').getContext('2d');
-let chart=new Chart(ctx,{
-type:'bar',
-data:{labels:['Win','Loss'],datasets:[{label:'Count',data:[0,0],backgroundColor:['#38a169','#e53e3e']}]},
-options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,precision:0}}}
-});
-
-function generateResult(){
-if(lock) return;
-let inputNum=Math.floor(Math.random()*10);
-num.value=inputNum;
-
-// Rolling animation
-let rollCount=0;
-rollingInt=setInterval(()=>{
-rollCount++;
-document.getElementById("rolling").innerText=Math.floor(Math.random()*10);
-if(rollCount>=10){
-clearInterval(rollingInt);
-document.getElementById("rolling").innerText=inputNum;
-finishRound(inputNum);
-}
-},50);
-
-startLock();
+function goToPage(p){
+document.querySelectorAll(".page").forEach(x=>x.style.display="none");
+document.getElementById("page"+p).style.display="block";
 }
 
-function finishRound(inputNum){
-let smallChance=admin.prob/100;
-let result=Math.random()<smallChance?"Small":"Big";
-let outcome=Math.random()<0.5?"Win":"Loss";
-data.unshift(outcome);
-localStorage.setItem("data",JSON.stringify(data));
+function togglePass(id,el){
+let i=document.getElementById(id);
+i.type=i.type==="password"?"text":"password";
+el.innerText=i.type==="password"?"Show":"Hide";
+}
+
+function signup(){
+const u={
+name:suName.value.trim(),
+user:suUser.value.trim(),
+email:suEmail.value.trim(),
+mobile:suMobile.value.trim(),
+pass:suPass.value
+};
+if(!u.name||!u.user||!u.email||!u.mobile||!u.pass||!suCPass.value){
+msg1.innerText="সব তথ্য পূরণ করুন";return}
+if(u.pass!==suCPass.value){
+msg1.innerText="Password মিলছে না";return}
+localStorage.setItem("user",JSON.stringify(u));
+msg1.innerText="Signup Successful ✅";
+setTimeout(()=>goToPage(4),1000);
+}
+
+function login(){
+user=JSON.parse(localStorage.getItem("user"));
+if(!user){msg2.innerText="Signup করুন";return}
+if((liUser.value===user.user||liUser.value===user.mobile)&&liPass.value===user.pass){
+goToPage(2)
+}else msg2.innerText="ভুল তথ্য";
+}
+
+function logout(){server="";goToPage(4)}
+
+function selectServer(s){
+server=s;
+if(!data[s])data[s]=[];
+serverTitle.innerText=s+" SERVER";
+goToPage(3);
 render();
 }
 
-function startLock(){
-lock=true;
-let t=admin.lock;
-document.querySelectorAll("button,input").forEach(e=>e.disabled=true);
-timer.innerText="Wait: "+t+"s";
-
-timerInt=setInterval(()=>{
-t--;
-timer.innerText="Wait: "+t+"s";
-if(t<=0){
-clearInterval(timerInt);
-lock=false;
-document.querySelectorAll("button,input").forEach(e=>e.disabled=false);
-timer.innerText="";
-setTimeout(runAutoRound, admin.interval*1000);
+function showResult(){
+if(lock)return;
+let v=num.value;
+if(v===""||v<0||v>9){alert("0-9 এর মধ্যে সংখ্যা দিন");return}
+let result=Math.random()<0.5?"Small":"Big";
+numberText.innerText="Your Number: "+v;
+resultText.innerText="Result: "+result;
+startTimer();
 }
-},1000);
+
+function startTimer(){
+lock=true;let t=20;
+resBtn.disabled=true;num.disabled=true;
+timer.innerText="Wait: "+t+"s";
+timerI=setInterval(()=>{
+t--;timer.innerText="Wait: "+t+"s";
+if(t<=0){
+clearInterval(timerI);lock=false;
+timer.innerText="";resBtn.disabled=false;num.disabled=false}
+},1000)
+}
+
+function add(v){
+data[server].unshift(v);
+localStorage.setItem("serverData",JSON.stringify(data));
+render();
 }
 
 function render(){
-let w=data.filter(x=>x==="Win").length;
-let l=data.length-w;
+let h=data[server];
+history.innerHTML=h.length
+?h.map(x=>`<div style="background:${x==='Win'?'#38a169':'#e53e3e'}">${x}</div>`).join("")
+:"<div style='background:#777'>No History</div>";
+let w=h.filter(x=>x==="Win").length;
+let l=h.filter(x=>x==="Loss").length;
+let t=w+l;
 wC.innerText="Win: "+w;
 lC.innerText="Loss: "+l;
-history.innerHTML=data.map(x=>`<div class="${x==='Win'?'win':'loss'}">${x}</div>`).join("");
-// streak
-let streak=0,type="";
-for(let i=0;i<data.length;i++){
-if(i===0||data[i]===data[i-1]){type=data[i];streak++;}else break;}
-streakText=streak?type+" streak: "+streak:"";
-streak.innerText=streakText;
-// chart update
-chart.data.datasets[0].data=[w,l];
-chart.update();
-}
-
-function saveAdmin(){
-admin.lock=parseInt(lockTime.value)||10;
-admin.prob=parseInt(prob.value)||50;
-admin.interval=parseInt(interval.value)||5;
-localStorage.setItem("admin",JSON.stringify(admin));
-alert("Saved");
+wP.innerText="Win %: "+(t?(w/t*100).toFixed(1):0)+"%";
+lP.innerText="Loss %: "+(t?(l/t*100).toFixed(1):0)+"%";
+winBar.style.width=(t?(w/t*100):0)+"%";
+lossBar.style.width=(t?(l/t*100):0)+"%";
 }
 
 function clearHistory(){
-if(confirm("Clear all history?")){
-data=[];
-localStorage.removeItem("data");
+if(confirm("History clear করবেন?")){
+data[server]=[];
+localStorage.setItem("serverData",JSON.stringify(data));
 render();
 }
 }
-
-function runAutoRound(){
-generateResult();
-}
-
-render();
 </script>
+
 </body>
 </html>
+
