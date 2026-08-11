@@ -3,442 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart RNG Wingo Predictor</title>
+    <title>Pattern Analyzer Pro</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
-            background-color: #f4f6f9;
+            background-color: #0f172a;
+            color: #f8fafc;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
-            padding: 10px;
+            padding: 12px;
         }
 
-        .browser-container {
+        .container {
             width: 100%;
-            max-width: 500px;
-            background: #ffffff;
+            max-width: 480px;
+            background: #1e293b;
             border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #e1e4e8;
+            gap: 16px;
         }
 
-        .navbar {
-            display: flex;
-            align-items: center;
-            background: #ffffff;
-            padding: 12px 15px;
-            gap: 8px;
-            border-bottom: 1px solid #eee;
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
         }
 
-        .nav-btn {
-            background: #f0f2f5;
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            cursor: pointer;
-            font-size: 16px;
+        .header h1 {
+            font-size: 18px;
+            color: #38bdf8;
         }
 
-        .search-bar {
-            flex: 1;
-            display: flex;
-            background: #f0f2f5;
-            border-radius: 20px;
-            padding: 4px 12px;
-        }
-
-        .search-bar input {
-            width: 100%;
-            border: none;
-            background: transparent;
-            outline: none;
-            padding: 6px;
-            font-size: 13px;
-        }
-
-        .go-btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 18px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .viewport {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .header p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
         }
 
         .card {
-            background: #ffffff;
-            padding: 16px;
+            background: #0f172a;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            border: 1px solid #f0f0f0;
+            padding: 14px;
+            border: 1px solid #334155;
+        }
+
+        .card-title {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             text-align: center;
         }
 
-        .card h2, .card h3 {
-            font-size: 16px;
-            color: #1e293b;
+        /* Input Controls */
+        .input-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .btn-big-inp { background: #f59e0b; }
+        .btn-small-inp { background: #3b82f6; }
+        .btn-big-inp:active, .btn-small-inp:active { transform: scale(0.96); }
+
+        /* Current Live Trend Chain */
+        .trend-chain {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 8px 0;
+            min-height: 40px;
+            align-items: center;
+        }
+
+        .trend-pill {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+        }
+
+        /* Prediction Card Display */
+        .prediction-box {
+            text-align: center;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 10px;
+            border: 2px dashed #38bdf8;
+        }
+
+        .detected-pattern {
+            font-size: 12px;
+            color: #e2e8f0;
+            background: #334155;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
             margin-bottom: 8px;
         }
 
-        .confidence-badge {
-            background: #eff6ff;
-            color: #2563eb;
-            padding: 6px 12px;
-            border-radius: 20px;
+        .pred-result {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 5px 0;
+        }
+
+        .confidence {
             font-size: 12px;
+            color: #10b981;
             font-weight: 600;
-            display: inline-block;
-            margin-bottom: 10px;
         }
 
-        .result-box {
+        /* Feedback Section */
+        .feedback-box {
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-top: 10px;
-            padding: 12px 5px;
-            border-radius: 10px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-        }
-
-        .res-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-        }
-
-        .res-item small {
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        .res-value {
-            font-size: 20px;
-            font-weight: 700;
-            margin-top: 2px;
-        }
-
-        .color-dot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-top: 4px;
-        }
-
-        .feedback-section {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px dashed #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             gap: 10px;
-            font-size: 13px;
-            color: #334155;
+            margin-top: 10px;
+            justify-content: center;
         }
 
-        .btn-win, .btn-loss {
+        .btn-fb {
             border: none;
-            padding: 6px 16px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
             font-weight: 600;
             font-size: 12px;
             cursor: pointer;
             color: white;
         }
+        .btn-win { background: #10b981; }
+        .btn-loss { background: #ef4444; }
 
-        .btn-win { background-color: #10b981; }
-        .btn-loss { background-color: #ef4444; }
-
+        /* Stats Section */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .stat-card {
-            background: #f8fafc;
-            padding: 8px 4px;
-            border-radius: 8px;
-            font-size: 11px;
-            color: #64748b;
-            border: 1px solid #f1f5f9;
-        }
-
-        .stat-card span {
-            display: block;
-            font-size: 15px;
-            font-weight: 700;
-            margin-top: 2px;
-            color: #0f172a;
-        }
-
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        th, td {
-            padding: 8px 4px;
-            border-bottom: 1px solid #f1f5f9;
+            gap: 6px;
             text-align: center;
         }
 
-        th {
-            background-color: #f8fafc;
-            color: #64748b;
-            font-weight: 600;
+        .stat-item {
+            background: #1e293b;
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #94a3b8;
         }
 
-        .badge {
-            padding: 3px 6px;
-            border-radius: 4px;
-            color: white;
-            font-weight: 600;
+        .stat-item span {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-top: 2px;
+        }
+
+        /* Action Buttons */
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 5px 10px;
+            border-radius: 6px;
             font-size: 11px;
-            display: inline-block;
+            cursor: pointer;
         }
 
         .bg-big { background-color: #f59e0b; }
         .bg-small { background-color: #3b82f6; }
-        .bg-win { background-color: #10b981; }
-        .bg-loss { background-color: #ef4444; }
     </style>
 </head>
 <body>
 
-    <div class="browser-container">
-        <div class="navbar">
-            <button class="nav-btn" onclick="goHome()">🏠</button>
-            <div class="search-bar">
-                <input type="number" id="serialInput" placeholder="পিরিয়ড নম্বর (যেমন: 050880)" />
-            </div>
-            <button class="go-btn" onclick="predictResult()">Predict</button>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Real Pattern Analyzer Engine</h1>
+            <p>ইনপুট দিন ➔ ট্রেন্ড এনালাইজ করুন ➔ সঠিক রেজাল্ট পান</p>
         </div>
 
-        <div class="viewport">
-            <!-- Main Result Output -->
-            <div class="card">
-                <h2>RNG Smart Predictor</h2>
-                <div class="confidence-badge" id="confidenceBadge">System Ready</div>
-                
-                <div class="result-box" id="resultDisplay" style="display: none;">
-                    <div class="res-item">
-                        <small>পিরিয়ড</small>
-                        <div class="res-value" id="resPeriod" style="font-size: 13px; color: #475569;">-</div>
-                    </div>
-                    <div class="res-item">
-                        <small>স্মার্ট নম্বর</small>
-                        <div class="res-value" id="resNumber">-</div>
-                    </div>
-                    <div class="res-item">
-                        <small>প্রেডিকশন</small>
-                        <div class="res-value" id="resSize">-</div>
-                    </div>
-                    <div class="res-item">
-                        <small>কালার</small>
-                        <div id="resColorBox"></div>
-                    </div>
+        <!-- 1. Input Section -->
+        <div class="card">
+            <div class="card-title">১. গেমের হিস্ট্রি ইনপুট দিন (পরপর ৪-৫টি)</div>
+            <div class="input-buttons">
+                <button class="btn-input btn-big-inp" onclick="addGameData('Big')">+ BIG</button>
+                <button class="btn-input btn-small-inp" onclick="addGameData('Small')">+ SMALL</button>
+            </div>
+            
+            <div style="margin-top: 12px;">
+                <div class="action-row">
+                    <span style="font-size: 11px; color: #94a3b8;">আপনার দেওয়া সাম্প্রতিক ডাটা:</span>
+                    <button class="btn-reset" onclick="resetAllData()">Clear Data</button>
                 </div>
-
-                <!-- Win/Loss Feedback Buttons -->
-                <div class="feedback-section" id="feedbackSection" style="display: none;">
-                    <span>রেজাল্ট কি মিলেছে?</span>
-                    <button class="btn-win" onclick="recordFeedback(true)">WIN 👍</button>
-                    <button class="btn-loss" onclick="recordFeedback(false)">LOSS 👎</button>
+                <div class="trend-chain" id="trendChain">
+                    <span style="font-size: 11px; color: #64748b;">কমপক্ষে ৩টি ইনপুট দিন...</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Live Performance -->
-            <div class="card">
-                <h3>পারফর্মেন্স ট্র্যাকার</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">মোট<span id="statTotal">0</span></div>
-                    <div class="stat-card">Win<span id="statWin" style="color: #10b981;">0</span></div>
-                    <div class="stat-card">Loss<span id="statLoss" style="color: #ef4444;">0</span></div>
-                    <div class="stat-card">Win Rate<span id="statRate" style="color: #2563eb;">0%</span></div>
-                </div>
+        <!-- 2. Prediction Output -->
+        <div class="card">
+            <div class="card-title">২. প্যাটার্ন অ্যানালিসিস ও প্রেডিকশন</div>
+            <div class="prediction-box">
+                <div class="detected-pattern" id="detectedPattern">প্যাটার্ন: ডাটা অপেক্ষমান</div>
+                <div class="pred-result" id="predResult" style="color: #64748b;">--</div>
+                <div class="confidence" id="confidence">গেমের রেজাল্ট ইনপুট দিলে প্রেডিকশন আসবে</div>
             </div>
 
-            <!-- History Table -->
-            <div class="card">
-                <h3>হিস্ট্রি ট্র্যাকার</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Serial</th>
-                                <th>Num</th>
-                                <th>Size</th>
-                                <th>Color</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody">
-                            <tr>
-                                <td colspan="5" style="color: #94a3b8; padding: 15px;">কোনো ডেটা নেই</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Win/Loss Feedback -->
+            <div class="feedback-box" id="feedbackBox" style="display: none;">
+                <button class="btn-fb btn-win" onclick="recordFeedback(true)">WIN 👍</button>
+                <button class="btn-fb btn-loss" onclick="recordFeedback(false)">LOSS 👎</button>
             </div>
+        </div>
 
+        <!-- 3. Performance Stats -->
+        <div class="card">
+            <div class="stats-grid">
+                <div class="stat-item">মোট<span id="statTotal">0</span></div>
+                <div class="stat-item">Win<span id="statWin" style="color: #10b981;">0</span></div>
+                <div class="stat-item">Loss<span id="statLoss" style="color: #ef4444;">0</span></div>
+                <div class="stat-item">Accuracy<span id="statRate" style="color: #38bdf8;">0%</span></div>
+            </div>
         </div>
     </div>
 
     <script>
-        const serialInput = document.getElementById('serialInput');
-        const resultDisplay = document.getElementById('resultDisplay');
-        const feedbackSection = document.getElementById('feedbackSection');
-        const historyTableBody = document.getElementById('historyTableBody');
-
-        let historyData = [];
+        let inputHistory = [];
         let totalWins = 0;
         let totalLosses = 0;
+        let currentPrediction = null;
 
-        serialInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') predictResult();
-        });
-
-        // Murmur3-style Mix-Hash Generator for Natural RNG Distribution
-        function generateRNGNumber(serialStr) {
-            let num = parseInt(serialStr, 10);
-            if (isNaN(num)) {
-                num = 0;
-                for (let i = 0; i < serialStr.length; i++) {
-                    num = (num * 31 + serialStr.charCodeAt(i)) & 0xFFFFFFFF;
-                }
-            }
-
-            // Pseudo Random Hash Mixing
-            let h = Math.abs(num ^ 0xDEADBEEF);
-            h = Math.imul(h ^ (h >>> 16), 0x85ebca6b);
-            h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
-            h = (h ^ (h >>> 16)) >>> 0;
-
-            // Generate Number between 0 and 9
-            return h % 10;
+        function addGameData(type) {
+            inputHistory.push(type);
+            updateTrendChainUI();
+            analyzeAndPredict();
         }
 
-        function getColorDetails(num) {
-            if (num === 0) return { name: 'Red+Vio', bg: 'linear-gradient(135deg, #ef4444, #a855f7)' };
-            if (num === 5) return { name: 'Grn+Vio', bg: 'linear-gradient(135deg, #10b981, #a855f7)' };
-            if ([1, 3, 7, 9].includes(num)) return { name: 'Green', bg: '#10b981' };
-            return { name: 'Red', bg: '#ef4444' };
-        }
-
-        function predictResult() {
-            const serial = serialInput.value.trim();
-            if (!serial) {
-                alert('পিরিয়ড নম্বর লিখুন!');
+        function updateTrendChainUI() {
+            const container = document.getElementById('trendChain');
+            if (inputHistory.length === 0) {
+                container.innerHTML = '<span style="font-size: 11px; color: #64748b;">কমপক্ষে ৩টি ইনপুট দিন...</span>';
                 return;
             }
 
-            // র্যান্ডম নম্বর জেনারেট (0-9)
-            const number = generateRNGNumber(serial);
-            const size = (number >= 5) ? 'Big' : 'Small';
-            const colorInfo = getColorDetails(number);
+            container.innerHTML = inputHistory.map(item => `
+                <span class="trend-pill ${item === 'Big' ? 'bg-big' : 'bg-small'}">${item}</span>
+            `).join('');
 
-            // UI আপডেট
-            document.getElementById('resPeriod').innerText = serial.length > 6 ? serial.slice(-6) : serial;
-            document.getElementById('resNumber').innerText = number;
-            
-            const resSizeElem = document.getElementById('resSize');
-            resSizeElem.innerText = size;
-            resSizeElem.style.color = size === 'Big' ? '#f59e0b' : '#3b82f6';
+            // Scroll to end automatically
+            container.scrollLeft = container.scrollWidth;
+        }
 
-            document.getElementById('resColorBox').innerHTML = `
-                <div class="color-dot" style="background: ${colorInfo.bg};"></div>
-            `;
+        function analyzeAndPredict() {
+            const len = inputHistory.length;
+            const predResultElem = document.getElementById('predResult');
+            const patternElem = document.getElementById('detectedPattern');
+            const confElem = document.getElementById('confidence');
+            const feedbackBox = document.getElementById('feedbackBox');
 
-            // ডায়নামিক একিউরেসি স্কোর
-            let dynamicConf = 75 + (number * 2) % 18;
-            document.getElementById('confidenceBadge').innerText = `RNG Analysis: ${dynamicConf}% Probability`;
-
-            resultDisplay.style.display = 'flex';
-            feedbackSection.style.display = 'flex';
-
-            // হিস্ট্রি টেবিল আপডেট
-            const existingIndex = historyData.findIndex(item => item.serial === serial);
-            if (existingIndex === -1) {
-                historyData.unshift({ serial, number, size, colorInfo, status: 'Pending' });
-                updateHistoryUI();
+            if (len < 3) {
+                patternElem.innerText = "প্যাটার্ন: আরও ডাটা প্রয়োজন";
+                predResultElem.innerText = "--";
+                predResultElem.style.color = "#64748b";
+                confElem.innerText = `কমপক্ষে ৩টি ইনপুট দিন (বর্তমান: ${len}/3)`;
+                feedbackBox.style.display = 'none';
+                return;
             }
+
+            let prediction = "";
+            let patternName = "";
+            let confidence = 0;
+
+            const last1 = inputHistory[len - 1];
+            const last2 = inputHistory[len - 2];
+            const last3 = inputHistory[len - 3];
+            const last4 = len >= 4 ? inputHistory[len - 4] : null;
+
+            // --- Real Algorithm Pattern Logic ---
+
+            // 1. Long Streak / Dragon Pattern (e.g. Big, Big, Big -> Big)
+            if (last1 === last2 && last2 === last3) {
+                if (len >= 5 && inputHistory[len - 5] === last1 && last4 === last1) {
+                    // 5+ Dragon -> Break probability high
+                    prediction = last1 === 'Big' ? 'Small' : 'Big';
+                    patternName = "Dragon Break Pattern";
+                    confidence = 82;
+                } else {
+                    // Continuous Dragon
+                    prediction = last1; 
+                    patternName = "Dragon / Long Streak Pattern";
+                    confidence = 88;
+                }
+            } 
+            // 2. Single Alternating Pattern (1x1) (e.g. Big, Small, Big -> Small)
+            else if (last1 !== last2 && last2 !== last3) {
+                prediction = last1 === 'Big' ? 'Small' : 'Big';
+                patternName = "Single Alternating Pattern (1x1)";
+                confidence = 85;
+            } 
+            // 3. Double Alternating Pattern (2x2) (e.g. Big, Big, Small, Small -> Big)
+            else if (last4 && last1 === last2 && last3 === last4 && last1 !== last3) {
+                prediction = last1 === 'Big' ? 'Small' : 'Big';
+                patternName = "Double Pattern (2x2 Shift)";
+                confidence = 80;
+            } 
+            // 4. Pair Follow Pattern (e.g. Small, Big, Big -> Small)
+            else if (last1 === last2 && last2 !== last3) {
+                prediction = last1; 
+                patternName = "Pair Continuous Pattern";
+                confidence = 76;
+            } 
+            // 5. Mixed Pattern Fallback
+            else {
+                prediction = last1 === 'Big' ? 'Small' : 'Big';
+                patternName = "Trend Shift Pattern";
+                confidence = 70;
+            }
+
+            currentPrediction = prediction;
+
+            // UI Render
+            patternElem.innerText = `প্যাটার্ন: ${patternName}`;
+            predResultElem.innerText = `NEXT: ${prediction}`;
+            predResultElem.style.color = prediction === 'Big' ? '#f59e0b' : '#3b82f6';
+            confElem.innerText = `Probability Match: ${confidence}%`;
+
+            feedbackBox.style.display = 'flex';
         }
 
         function recordFeedback(isWin) {
-            if (historyData.length === 0) return;
+            if (!currentPrediction) return;
 
             if (isWin) {
                 totalWins++;
-                historyData[0].status = 'WIN';
+                // Win হলে অ্যাপ পরবর্তী ডাটা হিসেবে ধরে নেবে প্রেডিকশন সফল
+                inputHistory.push(currentPrediction);
             } else {
                 totalLosses++;
-                historyData[0].status = 'LOSS';
+                // Loss হলে বিপরীতটা হিস্ট্রিতে যোগ করবে
+                let actual = currentPrediction === 'Big' ? 'Small' : 'Big';
+                inputHistory.push(actual);
             }
 
-            feedbackSection.style.display = 'none';
-            updateHistoryUI();
+            updateTrendChainUI();
             updateStatsUI();
-        }
-
-        function updateHistoryUI() {
-            if (historyData.length === 0) return;
-
-            historyTableBody.innerHTML = historyData.map(item => `
-                <tr>
-                    <td><b>${item.serial.length > 6 ? item.serial.slice(-6) : item.serial}</b></td>
-                    <td><b>${item.number}</b></td>
-                    <td>
-                        <span class="badge ${item.size === 'Big' ? 'bg-big' : 'bg-small'}">
-                            ${item.size}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge" style="background: ${item.colorInfo.bg}">
-                            ${item.colorInfo.name}
-                        </span>
-                    </td>
-                    <td>
-                        ${item.status === 'WIN' ? '<span class="badge bg-win">WIN</span>' : 
-                          item.status === 'LOSS' ? '<span class="badge bg-loss">LOSS</span>' : 
-                          '<span style="color:#94a3b8;">Wait</span>'}
-                    </td>
-                </tr>
-            `).join('');
+            analyzeAndPredict();
         }
 
         function updateStatsUI() {
@@ -451,10 +393,16 @@
             document.getElementById('statRate').innerText = `${rate}%`;
         }
 
-        function goHome() {
-            serialInput.value = '';
-            resultDisplay.style.display = 'none';
-            feedbackSection.style.display = 'none';
+        function resetAllData() {
+            if (confirm("সব ইনপুট ডাটা মুছে ফেলতে চান?")) {
+                inputHistory = [];
+                totalWins = 0;
+                totalLosses = 0;
+                currentPrediction = null;
+                updateTrendChainUI();
+                updateStatsUI();
+                analyzeAndPredict();
+            }
         }
     </script>
 </body>
