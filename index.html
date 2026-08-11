@@ -1,366 +1,452 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wingo Analyzer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wingo RNG Predictor Browser App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
 
-<style>
-*{
-box-sizing:border-box;
-font-family:'Roboto',sans-serif;
--webkit-tap-highlight-color:transparent
-}
+        .browser-container {
+            width: 100%;
+            max-width: 900px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #dcdcdc;
+        }
 
-body{
-margin:0;
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:12px;
-background:linear-gradient(-45deg,
-#0f2027,
-#203a43,
-#2c5364,
-#141e30,
-#243b55);
-background-size:500% 500%;
-animation:bgMove 14s ease infinite;
-}
+        /* Top Navigation Bar */
+        .navbar {
+            display: flex;
+            align-items: center;
+            background: #e3e6ed;
+            padding: 12px 15px;
+            gap: 10px;
+            border-bottom: 1px solid #ccc;
+            flex-wrap: wrap;
+        }
 
-@keyframes bgMove{
-0%{background-position:0% 50%}
-50%{background-position:100% 50%}
-100%{background-position:0% 50%}
-}
+        .nav-btn {
+            background: #ffffff;
+            border: 1px solid #bbb;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
 
-/* GLASS CARD */
-.page{
-display:none;
-width:100%;
-max-width:440px;
-padding:22px;
-border-radius:22px;
-background:rgba(255,255,255,0.15);
-backdrop-filter:blur(18px);
--webkit-backdrop-filter:blur(18px);
-border:1px solid rgba(255,255,255,0.25);
-box-shadow:
-0 0 30px rgba(0,255,255,0.15),
-0 20px 40px rgba(0,0,0,.45);
-animation:fadeUp .5s ease;
-}
+        .nav-btn:hover {
+            background: #d0d4dc;
+        }
 
-@keyframes fadeUp{
-from{opacity:0;transform:translateY(20px)}
-to{opacity:1;transform:translateY(0)}
-}
+        .search-bar {
+            flex: 1;
+            display: flex;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 4px 12px;
+            border: 1px solid #bbb;
+            min-width: 250px;
+        }
 
-h2{
-text-align:center;
-margin-bottom:15px;
-color:#fff;
-text-shadow:0 0 8px rgba(0,255,255,.6)
-}
+        .search-bar input {
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 6px;
+            font-size: 14px;
+        }
 
-input,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:14px;
-font-size:15px;
-outline:none;
-}
+        .go-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
 
-input{
-border:none;
-background:rgba(255,255,255,0.9);
-}
+        .go-btn:hover {
+            background: #218838;
+        }
 
-button{
-border:none;
-font-weight:600;
-cursor:pointer;
-transition:.3s;
-}
+        .auto-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-/* BUTTONS */
-.btn-primary{
-background:linear-gradient(135deg,#00c6ff,#0072ff);
-color:#fff;
-box-shadow:0 0 12px rgba(0,198,255,.6)
-}
+        /* Viewport Layout */
+        .viewport {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: #fafafa;
+        }
 
-.btn-primary:hover{
-transform:scale(1.04);
-box-shadow:0 0 20px rgba(0,198,255,1)
-}
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #eaeaea;
+            text-align: center;
+        }
 
-.btn-secondary{
-background:linear-gradient(135deg,#555,#222);
-color:#fff;
-}
+        /* Result Display Card */
+        .result-box {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 2px dashed #007bff;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-.center{
-text-align:center;
-color:#fff;
-}
+        .res-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-/* SERVER BUTTONS */
-.server-btn{
-height:72px;
-border-radius:50px;
-font-size:18px;
-margin-top:16px;
-color:#fff;
-display:flex;
-align-items:center;
-justify-content:center;
-box-shadow:0 0 25px rgba(0,0,0,.5);
-transition:.3s;
-}
+        .res-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
 
-.server-btn:hover{
-transform:scale(1.05);
-}
+        .color-dot {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-top: 5px;
+        }
 
-.hgzy{background:linear-gradient(135deg,#00f260,#0575e6)}
-.dkwin{background:linear-gradient(135deg,#f7971e,#ffd200)}
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
 
-/* STATS */
-.stat{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin-top:12px;
-}
+        .stat-card {
+            background: #f1f3f5;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
 
-.stat div{
-background:rgba(255,255,255,0.9);
-padding:8px;
-border-radius:10px;
-text-align:center;
-font-weight:600;
-}
+        .stat-card span {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
 
-/* HISTORY */
-#history{
-max-height:150px;
-overflow:auto;
-margin-top:12px;
-}
+        /* History Table */
+        .table-container {
+            overflow-x: auto;
+        }
 
-#history div{
-padding:6px;
-border-radius:8px;
-color:#fff;
-margin-bottom:6px;
-text-align:center;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
 
-.chart{margin-top:12px}
-.bar{height:18px;border-radius:10px;margin-top:6px}
-.win{background:#38a169}
-.loss{background:#e53e3e}
+        th, td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
 
-#timer{
-color:#ffeb3b;
-font-weight:bold;
-text-align:center;
-margin-top:8px;
-text-shadow:0 0 8px rgba(255,235,59,.8)
-}
-</style>
+        th {
+            background-color: #f1f3f5;
+            color: #495057;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .bg-big { background-color: #ff9800; }
+        .bg-small { background-color: #2196f3; }
+        .bg-green { background-color: #4caf50; }
+        .bg-red { background-color: #f44336; }
+        .bg-violet { background-color: #9c27b0; }
+
+        .timer-badge {
+            font-size: 14px;
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- SIGNUP -->
-<div class="page" id="page1">
-<h2>Signup</h2>
+    <div class="browser-container">
+        <!-- Navigation Bar -->
+        <div class="navbar">
+            <button class="nav-btn" onclick="goHome()">🏠</button>
+            <div class="search-bar">
+                <input type="text" id="serialInput" placeholder="গেমের পিরিয়ড সিরিয়াল নম্বর লিখুন (যেমন: 20260811100050993)" />
+            </div>
+            <button class="go-btn" onclick="predictResult()">Result</button>
+            <button class="auto-btn" id="autoBtn" onclick="toggleAutoPlay()">Auto 30s: OFF</button>
+        </div>
 
-<input id="suName" placeholder="Full Name">
-<input id="suUser" placeholder="Username">
-<input id="suEmail" type="email" placeholder="Email">
-<input id="suMobile" type="tel" placeholder="Mobile Number">
+        <!-- Main Viewport -->
+        <div class="viewport">
+            
+            <!-- Result Section -->
+            <div class="card" id="resultCard">
+                <h2>RNG প্রেডিকশন ইঞ্জিন</h2>
+                <p style="color: #666; font-size: 14px;">সিরিয়াল নম্বর লিখে <b>Result</b> বাটনে ক্লিক করুন। একই সিরিয়ালে ফলাফল সব সময় একই থাকবে।</p>
+                
+                <div class="result-box" id="resultDisplay" style="display: none;">
+                    <div class="res-item">
+                        <small>পিরিয়ড</small>
+                        <div class="res-value" id="resPeriod" style="font-size: 16px; color: #555;">-</div>
+                    </div>
+                    <div class="res-item">
+                        <small>নম্বর (Number)</small>
+                        <div class="res-value" id="resNumber">-</div>
+                    </div>
+                    <div class="res-item">
+                        <small>সাইজ (Big/Small)</small>
+                        <div class="res-value" id="resSize">-</div>
+                    </div>
+                    <div class="res-item">
+                        <small>কালার (Color)</small>
+                        <div id="resColorBox"></div>
+                    </div>
+                </div>
+            </div>
 
-<div style="position:relative">
-<input id="suPass" type="password" placeholder="Password">
-<span onclick="togglePass('suPass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#000">Show</span>
-</div>
+            <!-- Analytics / Statistics -->
+            <div class="card">
+                <h3>লাইভ স্ট্যাটিস্টিক্স (Analytics)</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">মোট চেক: <span id="statTotal">0</span></div>
+                    <div class="stat-card">Big: <span id="statBig">0</span></div>
+                    <div class="stat-card">Small: <span id="statSmall">0</span></div>
+                    <div class="stat-card">Green: <span id="statGreen">0</span></div>
+                    <div class="stat-card">Red: <span id="statRed">0</span></div>
+                </div>
+            </div>
 
-<div style="position:relative">
-<input id="suCPass" type="password" placeholder="Confirm Password">
-<span onclick="togglePass('suCPass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#000">Show</span>
-</div>
+            <!-- History Table -->
+            <div class="card">
+                <h3>হিস্ট্রি রেকর্ড (History)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Period Serial</th>
+                                <th>Number</th>
+                                <th>Big / Small</th>
+                                <th>Color</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="4" style="color: #888;">কোনো ডাটা পাওয়া যায়নি</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-<button class="btn-primary" onclick="signup()">Signup</button>
-<button class="btn-secondary" onclick="goToPage(4)">Back to Login</button>
-<p id="msg1" class="center"></p>
-</div>
+        </div>
+    </div>
 
-<!-- LOGIN -->
-<div class="page" id="page4" style="display:block">
-<h2>Login</h2>
-<input id="liUser" placeholder="Username or Mobile">
+    <script>
+        const serialInput = document.getElementById('serialInput');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const historyTableBody = document.getElementById('historyTableBody');
+        
+        let historyData = [];
+        let autoPlayInterval = null;
 
-<div style="position:relative">
-<input id="liPass" type="password" placeholder="Password">
-<span onclick="togglePass('liPass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#000">Show</span>
-</div>
+        // এন্টার বাটন রেসপন্স
+        serialInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                predictResult();
+            }
+        });
 
-<button class="btn-primary" onclick="login()">Login</button>
-<button class="btn-secondary" onclick="goToPage(1)">Signup</button>
-<p id="msg2" class="center"></p>
-</div>
+        // সিডেড হ্যাশিং অ্যালগরিদম (যা এক সিরিয়ালে সব সময় একই সংখ্যা রিটার্ন করবে)
+        function getDeterministicRNG(serialString) {
+            let hash = 0;
+            for (let i = 0; i < serialString.length; i++) {
+                hash = (hash << 5) - hash + serialString.charCodeAt(i);
+                hash |= 0; 
+            }
+            // ০ থেকে ৯ এর মধ্যে একটি ফিক্সড নাম্বার জেনারেট
+            return Math.abs(hash) % 10;
+        }
 
-<!-- MAIN -->
-<div class="page" id="page2">
-<h2>Select Server</h2>
-<button class="server-btn hgzy" onclick="selectServer('HGZY')">HGZY GAME SERVER</button>
-<button class="server-btn dkwin" onclick="selectServer('DKWIN')">DKWIN GAME SERVER</button>
-<button class="btn-secondary" onclick="logout()">Logout</button>
-</div>
+        // কালার লজিক নির্ধারণ
+        function getColorDetails(num) {
+            if (num === 0) return { name: 'Red + Violet', bg: 'linear-gradient(to right, #f44336, #9c27b0)' };
+            if (num === 5) return { name: 'Green + Violet', bg: 'linear-gradient(to right, #4caf50, #9c27b0)' };
+            if ([1, 3, 7, 9].includes(num)) return { name: 'Green', bg: '#4caf50' };
+            return { name: 'Red', bg: '#f44336' };
+        }
 
-<!-- RESULT -->
-<div class="page" id="page3">
-<h2 id="serverTitle"></h2>
+        // প্রেডিকশন রান করার ফাংশন
+        function predictResult() {
+            const serial = serialInput.value.trim();
 
-<input id="num" maxlength="1" placeholder="0-9">
-<button id="resBtn" class="btn-primary" onclick="showResult()">Show Result</button>
+            if (!serial) {
+                alert('অনুগ্রহ করে গেমের সিরিয়াল নম্বর ইনপুট দিন!');
+                return;
+            }
 
-<div id="numberText" class="center"></div>
-<div id="resultText" class="center"></div>
-<div id="timer"></div>
+            // ডিটারমিনিস্টিক ফলাফল তৈরি
+            const number = getDeterministicRNG(serial);
+            const size = number >= 5 ? 'Big' : 'Small';
+            const colorInfo = getColorDetails(number);
 
-<div class="stat">
-<div id="wC">Win: 0</div>
-<div id="lC">Loss: 0</div>
-<div id="wP">Win %: 0%</div>
-<div id="lP">Loss %: 0%</div>
-</div>
+            // রেজাল্ট UI আপডেট
+            document.getElementById('resPeriod').innerText = serial;
+            document.getElementById('resNumber').innerText = number;
+            
+            const resSizeElem = document.getElementById('resSize');
+            resSizeElem.innerText = size;
+            resSizeElem.style.color = size === 'Big' ? '#ff9800' : '#2196f3';
 
-<div class="chart">
-<div class="bar win" id="winBar"></div>
-<div class="bar loss" id="lossBar"></div>
-</div>
+            document.getElementById('resColorBox').innerHTML = `
+                <div class="color-dot" style="background: ${colorInfo.bg};"></div>
+                <div style="font-size: 12px; font-weight: bold;">${colorInfo.name}</div>
+            `;
 
-<button class="btn-primary" onclick="add('Win')">Win</button>
-<button class="btn-secondary" onclick="add('Loss')">Loss</button>
+            resultDisplay.style.display = 'flex';
 
-<div id="history"></div>
+            // হিস্ট্রিতে যোগ করা (যদি ডুপ্লিকেট না হয়)
+            const existingIndex = historyData.findIndex(item => item.serial === serial);
+            if (existingIndex !== -1) {
+                historyData.splice(existingIndex, 1); // আগের এন্ট্রি সরিয়ে ওপরে নিয়ে আসা
+            }
 
-<button class="btn-secondary" onclick="clearHistory()">Clear History</button>
-<button class="btn-secondary" onclick="goToPage(2)">Back</button>
-</div>
+            historyData.unshift({ serial, number, size, colorInfo });
+            
+            updateHistoryUI();
+            updateStatsUI();
+        }
 
-<script>
-let user=JSON.parse(localStorage.getItem("user"));
-let data=JSON.parse(localStorage.getItem("serverData"))||{};
-let server="",lock=false,timerI;
+        // হিস্ট্রি টেবিল আপডেট
+        function updateHistoryUI() {
+            if (historyData.length === 0) return;
 
-function goToPage(p){
-document.querySelectorAll(".page").forEach(x=>x.style.display="none");
-document.getElementById("page"+p).style.display="block";
-}
+            historyTableBody.innerHTML = historyData.map(item => `
+                <tr>
+                    <td><b>${item.serial}</b></td>
+                    <td><b>${item.number}</b></td>
+                    <td>
+                        <span class="badge ${item.size === 'Big' ? 'bg-big' : 'bg-small'}">
+                            ${item.size}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge" style="background: ${item.colorInfo.bg}">
+                            ${item.colorInfo.name}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-function togglePass(id,el){
-let i=document.getElementById(id);
-i.type=i.type==="password"?"text":"password";
-el.innerText=i.type==="password"?"Show":"Hide";
-}
+        // স্ট্যাটিস্টিক্স আপডেট
+        function updateStatsUI() {
+            const total = historyData.length;
+            const bigs = historyData.filter(i => i.size === 'Big').length;
+            const smalls = historyData.filter(i => i.size === 'Small').length;
+            const greens = historyData.filter(i => i.colorInfo.name.includes('Green')).length;
+            const reds = historyData.filter(i => i.colorInfo.name.includes('Red')).length;
 
-function signup(){
-const u={
-name:suName.value.trim(),
-user:suUser.value.trim(),
-email:suEmail.value.trim(),
-mobile:suMobile.value.trim(),
-pass:suPass.value
-};
-if(!u.name||!u.user||!u.email||!u.mobile||!u.pass||!suCPass.value){
-msg1.innerText="সব তথ্য পূরণ করুন";return}
-if(u.pass!==suCPass.value){
-msg1.innerText="Password মিলছে না";return}
-localStorage.setItem("user",JSON.stringify(u));
-msg1.innerText="Signup Successful ✅";
-setTimeout(()=>goToPage(4),1000);
-}
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statBig').innerText = bigs;
+            document.getElementById('statSmall').innerText = smalls;
+            document.getElementById('statGreen').innerText = greens;
+            document.getElementById('statRed').innerText = reds;
+        }
 
-function login(){
-user=JSON.parse(localStorage.getItem("user"));
-if(!user){msg2.innerText="Signup করুন";return}
-if((liUser.value===user.user||liUser.value===user.mobile)&&liPass.value===user.pass){
-goToPage(2)
-}else msg2.innerText="ভুল তথ্য";
-}
+        // অটোপ্লে ৩০ সেকেন্ড টাইমার মোড
+        function toggleAutoPlay() {
+            const btn = document.getElementById('autoBtn');
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                btn.innerText = 'Auto 30s: OFF';
+                btn.style.background = '#17a2b8';
+            } else {
+                if (!serialInput.value) {
+                    serialInput.value = '20260811100050993';
+                }
+                predictResult();
+                
+                autoPlayInterval = setInterval(() => {
+                    // শেষ সংখ্যা ১ বাড়িয়ে পরবর্তী সিরিয়াল জেনারেট
+                    let currentVal = serialInput.value;
+                    let lastDigits = currentVal.slice(-5);
+                    if (!isNaN(lastDigits)) {
+                        let nextNum = parseInt(lastDigits) + 1;
+                        serialInput.value = currentVal.slice(0, -5) + nextNum.toString().padStart(5, '0');
+                    }
+                    predictResult();
+                }, 30000);
 
-function logout(){server="";goToPage(4)}
+                btn.innerText = 'Auto 30s: ON';
+                btn.style.background = '#dc3545';
+            }
+        }
 
-function selectServer(s){
-server=s;
-if(!data[s])data[s]=[];
-serverTitle.innerText=s+" SERVER";
-goToPage(3);
-render();
-}
-
-function showResult(){
-if(lock)return;
-let v=num.value;
-if(v===""||v<0||v>9){alert("0-9 এর মধ্যে সংখ্যা দিন");return}
-let result=Math.random()<0.5?"Small":"Big";
-numberText.innerText="Your Number: "+v;
-resultText.innerText="Result: "+result;
-startTimer();
-}
-
-function startTimer(){
-lock=true;let t=20;
-resBtn.disabled=true;num.disabled=true;
-timer.innerText="Wait: "+t+"s";
-timerI=setInterval(()=>{
-t--;timer.innerText="Wait: "+t+"s";
-if(t<=0){
-clearInterval(timerI);lock=false;
-timer.innerText="";resBtn.disabled=false;num.disabled=false}
-},1000)
-}
-
-function add(v){
-data[server].unshift(v);
-localStorage.setItem("serverData",JSON.stringify(data));
-render();
-}
-
-function render(){
-let h=data[server];
-history.innerHTML=h.length
-?h.map(x=>`<div style="background:${x==='Win'?'#38a169':'#e53e3e'}">${x}</div>`).join("")
-:"<div style='background:#777'>No History</div>";
-let w=h.filter(x=>x==="Win").length;
-let l=h.filter(x=>x==="Loss").length;
-let t=w+l;
-wC.innerText="Win: "+w;
-lC.innerText="Loss: "+l;
-wP.innerText="Win %: "+(t?(w/t*100).toFixed(1):0)+"%";
-lP.innerText="Loss %: "+(t?(l/t*100).toFixed(1):0)+"%";
-winBar.style.width=(t?(w/t*100):0)+"%";
-lossBar.style.width=(t?(l/t*100):0)+"%";
-}
-
-function clearHistory(){
-if(confirm("History clear করবেন?")){
-data[server]=[];
-localStorage.setItem("serverData",JSON.stringify(data));
-render();
-}
-}
-</script>
-
+        function goHome() {
+            serialInput.value = '';
+            resultDisplay.style.display = 'none';
+        }
+    </script>
 </body>
 </html>
-
