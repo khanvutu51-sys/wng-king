@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>41 Rules Pattern Engine</title>
+    <title>Strict 41 Rules Pattern Engine</title>
     <style>
         * {
             box-sizing: border-box;
@@ -204,8 +204,8 @@
 
     <div class="container">
         <div class="header">
-            <h1>🎯 41 Rules Custom Pattern Analyzer</h1>
-            <p>আপনার রুলভিত্তিক নিখুঁত প্যাটার্ন প্রেডিক্টর</p>
+            <h1>🎯 True 41 Rules Pattern Engine</h1>
+            <p>আপনার রুলস অনুযায়ী ১০০% সঠিক সিকোয়েন্স ট্র্যাকার</p>
         </div>
 
         <div class="card">
@@ -217,7 +217,7 @@
             
             <div style="margin-top: 12px;">
                 <div class="action-row">
-                    <span style="font-size: 11px; color: #94a3b8;">আপনার দেওয়া ইনপুট চেইন:</span>
+                    <span style="font-size: 11px; color: #94a3b8;">আপনার বর্তমান ইনপুট সিকোয়েন্স:</span>
                     <button class="btn-reset" onclick="resetAllData()">Clear Data</button>
                 </div>
                 <div class="trend-chain" id="trendChain">
@@ -231,7 +231,7 @@
             <div class="prediction-box">
                 <div class="detected-pattern" id="detectedPattern">প্যাটার্ন: ইনপুটের অপেক্ষায়</div>
                 <div class="pred-result" id="predResult" style="color: #64748b;">--</div>
-                <div class="confidence" id="confidence">ইনপুট দিলে রুলস ম্যাচ করে প্রেডিকশন দেবে</div>
+                <div class="confidence" id="confidence">ইনপুট দিলে রুলস মিলিয়ে প্রেডিকশন দেবে</div>
             </div>
 
             <div class="feedback-box" id="feedbackBox" style="display: none;">
@@ -251,7 +251,7 @@
     </div>
 
     <script>
-        // ৪১টি কাস্টম রুলস এর তালিকা
+        // ৪১টি রুলস ডাটাবেস
         const rulesDatabase = [
             { id: 1, pattern: [4, 2, 1, 2, 4] },
             { id: 2, pattern: [1, 3, 1, 3, 1, 3] },
@@ -304,7 +304,7 @@
         function addGameData(type) {
             inputHistory.push(type);
             updateTrendChainUI();
-            analyze41Rules();
+            strictRuleMatch();
         }
 
         function updateTrendChainUI() {
@@ -321,25 +321,23 @@
             container.scrollLeft = container.scrollWidth;
         }
 
-        // ইনপুট সিকোয়েন্সকে রান-লেংথ (Block Array)-এ রূপান্তর করার ফাংশন
-        function getRunLengthArray(arr) {
+        function getRunLengths(arr) {
             if (arr.length === 0) return [];
             let runs = [];
-            let currentLen = 1;
-
+            let count = 1;
             for (let i = 1; i < arr.length; i++) {
                 if (arr[i] === arr[i - 1]) {
-                    currentLen++;
+                    count++;
                 } else {
-                    runs.push(currentLen);
-                    currentLen = 1;
+                    runs.push(count);
+                    count = 1;
                 }
             }
-            runs.push(currentLen);
+            runs.push(count);
             return runs;
         }
 
-        function analyze41Rules() {
+        function strictRuleMatch() {
             const predResultElem = document.getElementById('predResult');
             const patternElem = document.getElementById('detectedPattern');
             const confElem = document.getElementById('confidence');
@@ -349,51 +347,55 @@
                 patternElem.innerText = "প্যাটার্ন: ইনপুটের অপেক্ষায়";
                 predResultElem.innerText = "--";
                 predResultElem.style.color = "#64748b";
-                confElem.innerText = "ইনপুট দিলে রুলস ম্যাচ করে প্রেডিকশন দেবে";
+                confElem.innerText = "ইনপুট দিলে রুলস মিলিয়ে প্রেডিকশন দেবে";
                 feedbackBox.style.display = 'none';
                 return;
             }
 
-            const currentRuns = getRunLengthArray(inputHistory);
+            const currentRuns = getRunLengths(inputHistory);
             const lastType = inputHistory[inputHistory.length - 1];
+            const oppositeType = lastType === 'Big' ? 'Small' : 'Big';
 
-            let matchedRule = null;
+            let bestMatchRule = null;
             let predictedNext = null;
-            let matchConfidence = 0;
+            let currentBlockIndex = 0;
+            let progressInBlock = 0;
 
-            // ৪১টি রুলসের সাথে ম্যাচ করানো (দীর্ঘতম রুলসকে আগে অগ্রাধিকার দেওয়া হবে)
+            // দীর্ঘতম রুলস দিয়ে আগে সার্চ করা
             let sortedRules = [...rulesDatabase].sort((a, b) => b.pattern.length - a.pattern.length);
 
-            for (let ruleObj of sortedRules) {
-                let rule = ruleObj.pattern;
-                let cLen = currentRuns.length;
+            for (let r of sortedRules) {
+                let rule = r.pattern;
+                let len = currentRuns.length;
 
-                // কেইস ১: বর্তমান ট্রেন্ড রুলসের মাঝামাঝি কোনো ব্লক ম্যাচ করে পরবর্তী ব্লক কী হবে তা বের করা
-                if (cLen <= rule.length) {
-                    let isMatch = true;
-                    for (let i = 0; i < cLen - 1; i++) {
+                if (len <= rule.length) {
+                    let match = true;
+                    // আগের ব্লকগুলো পুরোপুরি মিলেছে কিনা দেখা
+                    for (let i = 0; i < len - 1; i++) {
                         if (currentRuns[i] !== rule[i]) {
-                            isMatch = false;
+                            match = false;
                             break;
                         }
                     }
 
-                    if (isMatch) {
-                        let currentBlockLen = currentRuns[cLen - 1];
-                        let targetBlockLen = rule[cLen - 1];
+                    if (match) {
+                        let curRun = currentRuns[len - 1];
+                        let targetRun = rule[len - 1];
 
-                        if (currentBlockLen < targetBlockLen) {
-                            // ওই একই ব্লকের ট্রেন্ড বজায় থাকবে
+                        if (curRun < targetRun) {
+                            // রুল অনুযায়ী বর্তমান ব্লক এখনো শেষ হয়নি -> একই ট্রেন্ড চলবে (No Reversal)
                             predictedNext = lastType;
-                            matchedRule = ruleObj;
-                            matchConfidence = Math.min(60 + (cLen * 8), 95);
+                            bestMatchRule = r;
+                            currentBlockIndex = len;
+                            progressInBlock = `${curRun}/${targetRun}`;
                             break;
-                        } else if (currentBlockLen === targetBlockLen) {
-                            // ব্লক শেষ, তাই কালার/সাইড চেঞ্জ হবে
-                            if (cLen < rule.length) {
-                                predictedNext = (lastType === 'Big') ? 'Small' : 'Big';
-                                matchedRule = ruleObj;
-                                matchConfidence = Math.min(65 + (cLen * 8), 98);
+                        } else if (curRun === targetRun) {
+                            // রুলের এই ব্লকটি শেষ হয়েছে -> এখন বিপরীত কালার/সাইড হবে
+                            if (len < rule.length) {
+                                predictedNext = oppositeType;
+                                bestMatchRule = r;
+                                currentBlockIndex = len + 1;
+                                progressInBlock = `0/${rule[len]}`;
                                 break;
                             }
                         }
@@ -401,23 +403,30 @@
                 }
             }
 
-            // যদি কোনো কাস্টম রুলস সরাসরি ম্যাচ না করে তবে ডিফল্ট লজিক
+            // যদি কাস্টম কোনো রুলস নির্দিষ্টভাবে কাজ না করে, তবে বর্তমান রানের সাথে সঙ্গতি রেখে সিদ্ধান্ত নেবে
             if (!predictedNext) {
-                predictedNext = (lastType === 'Big') ? 'Small' : 'Big';
-                matchedRule = { id: 'General', pattern: [] };
-                matchConfidence = 65;
+                // ২-এর বেশি একই জিনিস এলে রিভার্স করবে না, ট্রেন্ডেই থাকবে
+                let lastRun = currentRuns[currentRuns.length - 1];
+                if (lastRun === 1) {
+                    predictedNext = oppositeType; // Single Alternating
+                } else {
+                    predictedNext = lastType; // Streak Continuation
+                }
+                bestMatchRule = { id: 'Dynamic Streak', pattern: [] };
             }
 
             currentPrediction = predictedNext;
 
-            // UI আপডেট
-            patternElem.innerText = matchedRule.id === 'General' ? 
-                `প্যাটার্ন: General Reversal` : 
-                `ম্যাচ করেছে: Rule #${matchedRule.id} [${matchedRule.pattern.join('-')}]`;
+            // UI ইন্টারফেস আপডেট
+            if (bestMatchRule.id === 'Dynamic Streak') {
+                patternElem.innerText = `প্যাটার্ন: ট্রেন্ড ফ্লো (সাধারণ কন্টিনিউয়েশন)`;
+            } else {
+                patternElem.innerText = `ম্যাচিং: Rule #${bestMatchRule.id} [${bestMatchRule.pattern.join('-')}] (ধাপ: ${currentBlockIndex}, অগ্রগতি: ${progressInBlock})`;
+            }
 
             predResultElem.innerText = `NEXT: ${predictedNext}`;
             predResultElem.style.color = predictedNext === 'Big' ? '#f59e0b' : '#3b82f6';
-            confElem.innerText = `Rule Accuracy Match: ${matchConfidence}%`;
+            confElem.innerText = `Strict Rule Tracker Active`;
 
             feedbackBox.style.display = 'flex';
         }
@@ -436,7 +445,7 @@
 
             updateTrendChainUI();
             updateStatsUI();
-            analyze41Rules();
+            strictRuleMatch();
         }
 
         function updateStatsUI() {
@@ -457,7 +466,7 @@
                 currentPrediction = null;
                 updateTrendChainUI();
                 updateStatsUI();
-                analyze41Rules();
+                strictRuleMatch();
             }
         }
     </script>
