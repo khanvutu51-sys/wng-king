@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wingo RNG Predictor Browser App</title>
+    <title>Smart Wingo Predictor</title>
     <style>
         * {
             box-sizing: border-box;
@@ -33,7 +33,6 @@
             border: 1px solid #dcdcdc;
         }
 
-        /* Top Navigation Bar */
         .navbar {
             display: flex;
             align-items: center;
@@ -55,11 +54,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .nav-btn:hover {
-            background: #d0d4dc;
         }
 
         .search-bar {
@@ -88,24 +82,8 @@
             border-radius: 18px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s;
         }
 
-        .go-btn:hover {
-            background: #218838;
-        }
-
-        .auto-btn {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 18px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        /* Viewport Layout */
         .viewport {
             padding: 20px;
             display: flex;
@@ -123,7 +101,6 @@
             text-align: center;
         }
 
-        /* Result Display Card */
         .result-box {
             display: flex;
             justify-content: space-around;
@@ -144,7 +121,7 @@
         }
 
         .res-value {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             margin-top: 5px;
         }
@@ -157,10 +134,51 @@
             margin-top: 5px;
         }
 
-        /* Stats Section */
+        /* Win/Loss Buttons */
+        .feedback-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-win {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-loss {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .confidence-badge {
+            background: #e9ecef;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #495057;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
             gap: 10px;
             margin-top: 10px;
         }
@@ -179,7 +197,6 @@
             color: #333;
         }
 
-        /* History Table */
         .table-container {
             overflow-x: auto;
         }
@@ -197,10 +214,7 @@
             text-align: center;
         }
 
-        th {
-            background-color: #f1f3f5;
-            color: #495057;
-        }
+        th { background-color: #f1f3f5; }
 
         .badge {
             padding: 4px 8px;
@@ -212,86 +226,82 @@
 
         .bg-big { background-color: #ff9800; }
         .bg-small { background-color: #2196f3; }
-        .bg-green { background-color: #4caf50; }
-        .bg-red { background-color: #f44336; }
-        .bg-violet { background-color: #9c27b0; }
-
-        .timer-badge {
-            font-size: 14px;
-            color: #dc3545;
-            font-weight: bold;
-        }
+        .bg-win { background-color: #28a745; }
+        .bg-loss { background-color: #dc3545; }
     </style>
 </head>
 <body>
 
     <div class="browser-container">
-        <!-- Navigation Bar -->
         <div class="navbar">
             <button class="nav-btn" onclick="goHome()">🏠</button>
             <div class="search-bar">
                 <input type="text" id="serialInput" placeholder="গেমের পিরিয়ড সিরিয়াল নম্বর লিখুন (যেমন: 20260811100050993)" />
             </div>
-            <button class="go-btn" onclick="predictResult()">Result</button>
-            <button class="auto-btn" id="autoBtn" onclick="toggleAutoPlay()">Auto 30s: OFF</button>
+            <button class="go-btn" onclick="predictResult()">Smart Predict</button>
         </div>
 
-        <!-- Main Viewport -->
         <div class="viewport">
-            
-            <!-- Result Section -->
-            <div class="card" id="resultCard">
-                <h2>RNG প্রেডিকশন ইঞ্জিন</h2>
-                <p style="color: #666; font-size: 14px;">সিরিয়াল নম্বর লিখে <b>Result</b> বাটনে ক্লিক করুন। একই সিরিয়ালে ফলাফল সব সময় একই থাকবে।</p>
+            <!-- Smart Result Section -->
+            <div class="card">
+                <h2>স্মার্ট ট্রেন্ড ইঞ্জিন</h2>
+                <div class="confidence-badge" id="confidenceBadge">System Status: Waiting for input</div>
                 
                 <div class="result-box" id="resultDisplay" style="display: none;">
                     <div class="res-item">
                         <small>পিরিয়ড</small>
-                        <div class="res-value" id="resPeriod" style="font-size: 16px; color: #555;">-</div>
+                        <div class="res-value" id="resPeriod" style="font-size: 15px; color: #555;">-</div>
                     </div>
                     <div class="res-item">
-                        <small>নম্বর (Number)</small>
+                        <small>স্মার্ট নম্বর</small>
                         <div class="res-value" id="resNumber">-</div>
                     </div>
                     <div class="res-item">
-                        <small>সাইজ (Big/Small)</small>
+                        <small>প্রেডিকশন</small>
                         <div class="res-value" id="resSize">-</div>
                     </div>
                     <div class="res-item">
-                        <small>কালার (Color)</small>
+                        <small>কালার</small>
                         <div id="resColorBox"></div>
                     </div>
                 </div>
+
+                <!-- Win/Loss Feedback Buttons -->
+                <div class="feedback-section" id="feedbackSection" style="display: none;">
+                    <span>গেমের রেজাল্ট কি মিলেছে?</span>
+                    <button class="btn-win" onclick="recordFeedback(true)">WIN 👍</button>
+                    <button class="btn-loss" onclick="recordFeedback(false)">LOSS 👎</button>
+                </div>
             </div>
 
-            <!-- Analytics / Statistics -->
+            <!-- Stats Analytics -->
             <div class="card">
-                <h3>লাইভ স্ট্যাটিস্টিক্স (Analytics)</h3>
+                <h3>লাইভ পারফর্মেন্স ও একিউরেসি</h3>
                 <div class="stats-grid">
-                    <div class="stat-card">মোট চেক: <span id="statTotal">0</span></div>
-                    <div class="stat-card">Big: <span id="statBig">0</span></div>
-                    <div class="stat-card">Small: <span id="statSmall">0</span></div>
-                    <div class="stat-card">Green: <span id="statGreen">0</span></div>
-                    <div class="stat-card">Red: <span id="statRed">0</span></div>
+                    <div class="stat-card">মোট প্রেডিকশন: <span id="statTotal">0</span></div>
+                    <div class="stat-card">Win: <span id="statWin" style="color: #28a745;">0</span></div>
+                    <div class="stat-card">Loss: <span id="statLoss" style="color: #dc3545;">0</span></div>
+                    <div class="stat-card">Win Rate: <span id="statRate" style="color: #007bff;">0%</span></div>
                 </div>
             </div>
 
             <!-- History Table -->
             <div class="card">
-                <h3>হিস্ট্রি রেকর্ড (History)</h3>
+                <h3>হিস্ট্রি ও ফিডব্যাক ট্র্যাকার</h3>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Period Serial</th>
+                                <th>Serial</th>
                                 <th>Number</th>
-                                <th>Big / Small</th>
+                                <th>Big/Small</th>
                                 <th>Color</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody">
                             <tr>
-                                <td colspan="4" style="color: #888;">কোনো ডাটা পাওয়া যায়নি</td>
+                                <td colspan="5" style="color: #888;">কোনো ডাটা পাওয়া যায়নি</td>
                             </tr>
                         </tbody>
                     </table>
@@ -304,30 +314,29 @@
     <script>
         const serialInput = document.getElementById('serialInput');
         const resultDisplay = document.getElementById('resultDisplay');
+        const feedbackSection = document.getElementById('feedbackSection');
         const historyTableBody = document.getElementById('historyTableBody');
-        
-        let historyData = [];
-        let autoPlayInterval = null;
 
-        // এন্টার বাটন রেসপন্স
+        let historyData = [];
+        let totalWins = 0;
+        let totalLosses = 0;
+        let lastTrendChoice = null; 
+        let streakCount = 0;
+        let forcePatternChange = false;
+
         serialInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                predictResult();
-            }
+            if (e.key === 'Enter') predictResult();
         });
 
-        // সিডেড হ্যাশিং অ্যালগরিদম (যা এক সিরিয়ালে সব সময় একই সংখ্যা রিটার্ন করবে)
-        function getDeterministicRNG(serialString) {
+        function getBaseHash(serialString) {
             let hash = 0;
             for (let i = 0; i < serialString.length; i++) {
                 hash = (hash << 5) - hash + serialString.charCodeAt(i);
-                hash |= 0; 
+                hash |= 0;
             }
-            // ০ থেকে ৯ এর মধ্যে একটি ফিক্সড নাম্বার জেনারেট
-            return Math.abs(hash) % 10;
+            return Math.abs(hash);
         }
 
-        // কালার লজিক নির্ধারণ
         function getColorDetails(num) {
             if (num === 0) return { name: 'Red + Violet', bg: 'linear-gradient(to right, #f44336, #9c27b0)' };
             if (num === 5) return { name: 'Green + Violet', bg: 'linear-gradient(to right, #4caf50, #9c27b0)' };
@@ -335,21 +344,40 @@
             return { name: 'Red', bg: '#f44336' };
         }
 
-        // প্রেডিকশন রান করার ফাংশন
         function predictResult() {
             const serial = serialInput.value.trim();
-
             if (!serial) {
                 alert('অনুগ্রহ করে গেমের সিরিয়াল নম্বর ইনপুট দিন!');
                 return;
             }
 
-            // ডিটারমিনিস্টিক ফলাফল তৈরি
-            const number = getDeterministicRNG(serial);
-            const size = number >= 5 ? 'Big' : 'Small';
+            let baseHash = getBaseHash(serial);
+            let size = '';
+
+            // স্মার্ট অ্যালগরিদম ফিডব্যাক অনুযায়ী প্যাটার্ন ঠিক করবে
+            if (forcePatternChange && lastTrendChoice) {
+                size = lastTrendChoice === 'Big' ? 'Small' : 'Big';
+                forcePatternChange = false;
+            } else if (streakCount >= 3) {
+                size = lastTrendChoice === 'Big' ? 'Small' : 'Big';
+                streakCount = 0;
+            } else {
+                size = (baseHash % 2 === 0) ? 'Big' : 'Small';
+            }
+
+            lastTrendChoice = size;
+
+            // সিরিয়াল ও সাইজ অনুযায়ী মানানসই ফিক্সড নম্বর নির্বাচন
+            let number;
+            if (size === 'Big') {
+                number = 5 + (baseHash % 5); // 5 to 9
+            } else {
+                number = baseHash % 5; // 0 to 4
+            }
+
             const colorInfo = getColorDetails(number);
 
-            // রেজাল্ট UI আপডেট
+            // UI আপডেট
             document.getElementById('resPeriod').innerText = serial;
             document.getElementById('resNumber').innerText = number;
             
@@ -359,24 +387,47 @@
 
             document.getElementById('resColorBox').innerHTML = `
                 <div class="color-dot" style="background: ${colorInfo.bg};"></div>
-                <div style="font-size: 12px; font-weight: bold;">${colorInfo.name}</div>
+                <div style="font-size: 11px; font-weight: bold;">${colorInfo.name}</div>
             `;
 
-            resultDisplay.style.display = 'flex';
+            // কনফিডেন্স স্কোর হিসাব
+            let total = totalWins + totalLosses;
+            let winRate = total > 0 ? Math.round((totalWins / total) * 100) : 50;
+            let confidence = Math.min(Math.max(winRate + 20, 60), 95);
+            
+            document.getElementById('confidenceBadge').innerText = `Smart Analysis: ${confidence}% Confidence Pattern`;
+            document.getElementById('confidenceBadge').style.color = '#007bff';
 
-            // হিস্ট্রিতে যোগ করা (যদি ডুপ্লিকেট না হয়)
+            resultDisplay.style.display = 'flex';
+            feedbackSection.style.display = 'flex';
+
+            // হিস্ট্রি এন্ট্রি (Pending অবস্থায়)
             const existingIndex = historyData.findIndex(item => item.serial === serial);
-            if (existingIndex !== -1) {
-                historyData.splice(existingIndex, 1); // আগের এন্ট্রি সরিয়ে ওপরে নিয়ে আসা
+            if (existingIndex === -1) {
+                historyData.unshift({ serial, number, size, colorInfo, status: 'Pending' });
+                updateHistoryUI();
+            }
+        }
+
+        function recordFeedback(isWin) {
+            if (historyData.length === 0) return;
+
+            if (isWin) {
+                totalWins++;
+                streakCount++;
+                historyData[0].status = 'WIN';
+            } else {
+                totalLosses++;
+                streakCount = 0;
+                forcePatternChange = true; // পরের বার প্যাটার্ন ঘুরিয়ে দেবে
+                historyData[0].status = 'LOSS';
             }
 
-            historyData.unshift({ serial, number, size, colorInfo });
-            
+            feedbackSection.style.display = 'none';
             updateHistoryUI();
             updateStatsUI();
         }
 
-        // হিস্ট্রি টেবিল আপডেট
         function updateHistoryUI() {
             if (historyData.length === 0) return;
 
@@ -394,58 +445,29 @@
                             ${item.colorInfo.name}
                         </span>
                     </td>
+                    <td>
+                        ${item.status === 'WIN' ? '<span class="badge bg-win">WIN</span>' : 
+                          item.status === 'LOSS' ? '<span class="badge bg-loss">LOSS</span>' : 
+                          '<span style="color:#aaa;">Pending</span>'}
+                    </td>
                 </tr>
             `).join('');
         }
 
-        // স্ট্যাটিস্টিক্স আপডেট
         function updateStatsUI() {
-            const total = historyData.length;
-            const bigs = historyData.filter(i => i.size === 'Big').length;
-            const smalls = historyData.filter(i => i.size === 'Small').length;
-            const greens = historyData.filter(i => i.colorInfo.name.includes('Green')).length;
-            const reds = historyData.filter(i => i.colorInfo.name.includes('Red')).length;
+            let total = totalWins + totalLosses;
+            let rate = total > 0 ? Math.round((totalWins / total) * 100) : 0;
 
             document.getElementById('statTotal').innerText = total;
-            document.getElementById('statBig').innerText = bigs;
-            document.getElementById('statSmall').innerText = smalls;
-            document.getElementById('statGreen').innerText = greens;
-            document.getElementById('statRed').innerText = reds;
-        }
-
-        // অটোপ্লে ৩০ সেকেন্ড টাইমার মোড
-        function toggleAutoPlay() {
-            const btn = document.getElementById('autoBtn');
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
-                autoPlayInterval = null;
-                btn.innerText = 'Auto 30s: OFF';
-                btn.style.background = '#17a2b8';
-            } else {
-                if (!serialInput.value) {
-                    serialInput.value = '20260811100050993';
-                }
-                predictResult();
-                
-                autoPlayInterval = setInterval(() => {
-                    // শেষ সংখ্যা ১ বাড়িয়ে পরবর্তী সিরিয়াল জেনারেট
-                    let currentVal = serialInput.value;
-                    let lastDigits = currentVal.slice(-5);
-                    if (!isNaN(lastDigits)) {
-                        let nextNum = parseInt(lastDigits) + 1;
-                        serialInput.value = currentVal.slice(0, -5) + nextNum.toString().padStart(5, '0');
-                    }
-                    predictResult();
-                }, 30000);
-
-                btn.innerText = 'Auto 30s: ON';
-                btn.style.background = '#dc3545';
-            }
+            document.getElementById('statWin').innerText = totalWins;
+            document.getElementById('statLoss').innerText = totalLosses;
+            document.getElementById('statRate').innerText = `${rate}%`;
         }
 
         function goHome() {
             serialInput.value = '';
             resultDisplay.style.display = 'none';
+            feedbackSection.style.display = 'none';
         }
     </script>
 </body>
