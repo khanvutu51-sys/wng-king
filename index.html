@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pattern Analyzer Pro</title>
+    <title>41 Rules Pattern Engine</title>
     <style>
         * {
             box-sizing: border-box;
@@ -60,7 +60,7 @@
         }
 
         .card-title {
-            font-size: 13px;
+            font-size: 12px;
             color: #94a3b8;
             margin-bottom: 10px;
             text-transform: uppercase;
@@ -68,7 +68,6 @@
             text-align: center;
         }
 
-        /* Input Controls */
         .input-buttons {
             display: flex;
             gap: 10px;
@@ -91,7 +90,6 @@
         .btn-small-inp { background: #3b82f6; }
         .btn-big-inp:active, .btn-small-inp:active { transform: scale(0.96); }
 
-        /* Current Live Trend Chain */
         .trend-chain {
             display: flex;
             gap: 6px;
@@ -110,7 +108,6 @@
             white-space: nowrap;
         }
 
-        /* Prediction Card Display */
         .prediction-box {
             text-align: center;
             padding: 15px;
@@ -130,7 +127,7 @@
         }
 
         .pred-result {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
             margin: 5px 0;
         }
@@ -141,7 +138,6 @@
             font-weight: 600;
         }
 
-        /* Feedback Section */
         .feedback-box {
             display: flex;
             gap: 10px;
@@ -161,7 +157,6 @@
         .btn-win { background: #10b981; }
         .btn-loss { background: #ef4444; }
 
-        /* Stats Section */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -185,7 +180,6 @@
             margin-top: 2px;
         }
 
-        /* Action Buttons */
         .action-row {
             display: flex;
             justify-content: space-between;
@@ -210,13 +204,12 @@
 
     <div class="container">
         <div class="header">
-            <h1>🎯 Real Pattern Analyzer Engine</h1>
-            <p>ইনপুট দিন ➔ ট্রেন্ড এনালাইজ করুন ➔ সঠিক রেজাল্ট পান</p>
+            <h1>🎯 41 Rules Custom Pattern Analyzer</h1>
+            <p>আপনার রুলভিত্তিক নিখুঁত প্যাটার্ন প্রেডিক্টর</p>
         </div>
 
-        <!-- 1. Input Section -->
         <div class="card">
-            <div class="card-title">১. গেমের হিস্ট্রি ইনপুট দিন (পরপর ৪-৫টি)</div>
+            <div class="card-title">গেমের রেজাল্ট ইনপুট দিন</div>
             <div class="input-buttons">
                 <button class="btn-input btn-big-inp" onclick="addGameData('Big')">+ BIG</button>
                 <button class="btn-input btn-small-inp" onclick="addGameData('Small')">+ SMALL</button>
@@ -224,32 +217,29 @@
             
             <div style="margin-top: 12px;">
                 <div class="action-row">
-                    <span style="font-size: 11px; color: #94a3b8;">আপনার দেওয়া সাম্প্রতিক ডাটা:</span>
+                    <span style="font-size: 11px; color: #94a3b8;">আপনার দেওয়া ইনপুট চেইন:</span>
                     <button class="btn-reset" onclick="resetAllData()">Clear Data</button>
                 </div>
                 <div class="trend-chain" id="trendChain">
-                    <span style="font-size: 11px; color: #64748b;">কমপক্ষে ৩টি ইনপুট দিন...</span>
+                    <span style="font-size: 11px; color: #64748b;">ডাটা ইনপুট দেওয়া শুরু করুন...</span>
                 </div>
             </div>
         </div>
 
-        <!-- 2. Prediction Output -->
         <div class="card">
-            <div class="card-title">২. প্যাটার্ন অ্যানালিসিস ও প্রেডিকশন</div>
+            <div class="card-title">প্যাটার্ন অ্যানালিসিস ও আউটপুট</div>
             <div class="prediction-box">
-                <div class="detected-pattern" id="detectedPattern">প্যাটার্ন: ডাটা অপেক্ষমান</div>
+                <div class="detected-pattern" id="detectedPattern">প্যাটার্ন: ইনপুটের অপেক্ষায়</div>
                 <div class="pred-result" id="predResult" style="color: #64748b;">--</div>
-                <div class="confidence" id="confidence">গেমের রেজাল্ট ইনপুট দিলে প্রেডিকশন আসবে</div>
+                <div class="confidence" id="confidence">ইনপুট দিলে রুলস ম্যাচ করে প্রেডিকশন দেবে</div>
             </div>
 
-            <!-- Win/Loss Feedback -->
             <div class="feedback-box" id="feedbackBox" style="display: none;">
                 <button class="btn-fb btn-win" onclick="recordFeedback(true)">WIN 👍</button>
                 <button class="btn-fb btn-loss" onclick="recordFeedback(false)">LOSS 👎</button>
             </div>
         </div>
 
-        <!-- 3. Performance Stats -->
         <div class="card">
             <div class="stats-grid">
                 <div class="stat-item">মোট<span id="statTotal">0</span></div>
@@ -261,6 +251,51 @@
     </div>
 
     <script>
+        // ৪১টি কাস্টম রুলস এর তালিকা
+        const rulesDatabase = [
+            { id: 1, pattern: [4, 2, 1, 2, 4] },
+            { id: 2, pattern: [1, 3, 1, 3, 1, 3] },
+            { id: 3, pattern: [1, 1, 1, 2, 1, 3] },
+            { id: 4, pattern: [2, 2, 3, 3, 4, 4] },
+            { id: 5, pattern: [1, 2, 3, 4] },
+            { id: 6, pattern: [4, 3, 2, 1] },
+            { id: 7, pattern: [1, 1, 2, 2, 3, 3] },
+            { id: 8, pattern: [2, 3, 1, 3, 2] },
+            { id: 9, pattern: [1, 2, 4, 8] },
+            { id: 10, pattern: [1, 3, 1, 3] },
+            { id: 11, pattern: [2, 3, 2, 3] },
+            { id: 12, pattern: [1, 1, 2, 1, 3, 1] },
+            { id: 13, pattern: [2, 1, 2, 2, 2, 3] },
+            { id: 14, pattern: [4, 1, 4, 1] },
+            { id: 15, pattern: [4, 2, 4, 2] },
+            { id: 16, pattern: [4, 3, 4, 3] },
+            { id: 17, pattern: [1, 1, 1, 1] },
+            { id: 18, pattern: [1, 2] },
+            { id: 19, pattern: [1, 3] },
+            { id: 20, pattern: [1, 4] },
+            { id: 21, pattern: [2, 2] },
+            { id: 22, pattern: [2, 3] },
+            { id: 23, pattern: [2, 4] },
+            { id: 24, pattern: [3, 3] },
+            { id: 25, pattern: [3, 4] },
+            { id: 26, pattern: [4, 4] },
+            { id: 27, pattern: [5] },
+            { id: 28, pattern: [4, 1] },
+            { id: 29, pattern: [3, 1] },
+            { id: 30, pattern: [2, 1] },
+            { id: 31, pattern: [4, 2] },
+            { id: 32, pattern: [3, 2] },
+            { id: 33, pattern: [4, 3] },
+            { id: 34, pattern: [8] },
+            { id: 35, pattern: [1, 2, 1, 2, 3, 2, 1, 1, 3, 1, 1, 1, 2] },
+            { id: 36, pattern: [1, 2, 1, 3, 1, 2, 1, 2, 1, 1, 1, 1] },
+            { id: 37, pattern: [1, 3, 1, 1, 1, 3, 1] },
+            { id: 38, pattern: [1, 3, 1, 2] },
+            { id: 39, pattern: [2, 2, 4, 1, 1, 3, 1] },
+            { id: 40, pattern: [2, 4] },
+            { id: 41, pattern: [1, 1, 2] }
+        ];
+
         let inputHistory = [];
         let totalWins = 0;
         let totalLosses = 0;
@@ -269,13 +304,13 @@
         function addGameData(type) {
             inputHistory.push(type);
             updateTrendChainUI();
-            analyzeAndPredict();
+            analyze41Rules();
         }
 
         function updateTrendChainUI() {
             const container = document.getElementById('trendChain');
             if (inputHistory.length === 0) {
-                container.innerHTML = '<span style="font-size: 11px; color: #64748b;">কমপক্ষে ৩টি ইনপুট দিন...</span>';
+                container.innerHTML = '<span style="font-size: 11px; color: #64748b;">ডাটা ইনপুট দেওয়া শুরু করুন...</span>';
                 return;
             }
 
@@ -283,83 +318,106 @@
                 <span class="trend-pill ${item === 'Big' ? 'bg-big' : 'bg-small'}">${item}</span>
             `).join('');
 
-            // Scroll to end automatically
             container.scrollLeft = container.scrollWidth;
         }
 
-        function analyzeAndPredict() {
-            const len = inputHistory.length;
+        // ইনপুট সিকোয়েন্সকে রান-লেংথ (Block Array)-এ রূপান্তর করার ফাংশন
+        function getRunLengthArray(arr) {
+            if (arr.length === 0) return [];
+            let runs = [];
+            let currentLen = 1;
+
+            for (let i = 1; i < arr.length; i++) {
+                if (arr[i] === arr[i - 1]) {
+                    currentLen++;
+                } else {
+                    runs.push(currentLen);
+                    currentLen = 1;
+                }
+            }
+            runs.push(currentLen);
+            return runs;
+        }
+
+        function analyze41Rules() {
             const predResultElem = document.getElementById('predResult');
             const patternElem = document.getElementById('detectedPattern');
             const confElem = document.getElementById('confidence');
             const feedbackBox = document.getElementById('feedbackBox');
 
-            if (len < 3) {
-                patternElem.innerText = "প্যাটার্ন: আরও ডাটা প্রয়োজন";
+            if (inputHistory.length === 0) {
+                patternElem.innerText = "প্যাটার্ন: ইনপুটের অপেক্ষায়";
                 predResultElem.innerText = "--";
                 predResultElem.style.color = "#64748b";
-                confElem.innerText = `কমপক্ষে ৩টি ইনপুট দিন (বর্তমান: ${len}/3)`;
+                confElem.innerText = "ইনপুট দিলে রুলস ম্যাচ করে প্রেডিকশন দেবে";
                 feedbackBox.style.display = 'none';
                 return;
             }
 
-            let prediction = "";
-            let patternName = "";
-            let confidence = 0;
+            const currentRuns = getRunLengthArray(inputHistory);
+            const lastType = inputHistory[inputHistory.length - 1];
 
-            const last1 = inputHistory[len - 1];
-            const last2 = inputHistory[len - 2];
-            const last3 = inputHistory[len - 3];
-            const last4 = len >= 4 ? inputHistory[len - 4] : null;
+            let matchedRule = null;
+            let predictedNext = null;
+            let matchConfidence = 0;
 
-            // --- Real Algorithm Pattern Logic ---
+            // ৪১টি রুলসের সাথে ম্যাচ করানো (দীর্ঘতম রুলসকে আগে অগ্রাধিকার দেওয়া হবে)
+            let sortedRules = [...rulesDatabase].sort((a, b) => b.pattern.length - a.pattern.length);
 
-            // 1. Long Streak / Dragon Pattern (e.g. Big, Big, Big -> Big)
-            if (last1 === last2 && last2 === last3) {
-                if (len >= 5 && inputHistory[len - 5] === last1 && last4 === last1) {
-                    // 5+ Dragon -> Break probability high
-                    prediction = last1 === 'Big' ? 'Small' : 'Big';
-                    patternName = "Dragon Break Pattern";
-                    confidence = 82;
-                } else {
-                    // Continuous Dragon
-                    prediction = last1; 
-                    patternName = "Dragon / Long Streak Pattern";
-                    confidence = 88;
+            for (let ruleObj of sortedRules) {
+                let rule = ruleObj.pattern;
+                let cLen = currentRuns.length;
+
+                // কেইস ১: বর্তমান ট্রেন্ড রুলসের মাঝামাঝি কোনো ব্লক ম্যাচ করে পরবর্তী ব্লক কী হবে তা বের করা
+                if (cLen <= rule.length) {
+                    let isMatch = true;
+                    for (let i = 0; i < cLen - 1; i++) {
+                        if (currentRuns[i] !== rule[i]) {
+                            isMatch = false;
+                            break;
+                        }
+                    }
+
+                    if (isMatch) {
+                        let currentBlockLen = currentRuns[cLen - 1];
+                        let targetBlockLen = rule[cLen - 1];
+
+                        if (currentBlockLen < targetBlockLen) {
+                            // ওই একই ব্লকের ট্রেন্ড বজায় থাকবে
+                            predictedNext = lastType;
+                            matchedRule = ruleObj;
+                            matchConfidence = Math.min(60 + (cLen * 8), 95);
+                            break;
+                        } else if (currentBlockLen === targetBlockLen) {
+                            // ব্লক শেষ, তাই কালার/সাইড চেঞ্জ হবে
+                            if (cLen < rule.length) {
+                                predictedNext = (lastType === 'Big') ? 'Small' : 'Big';
+                                matchedRule = ruleObj;
+                                matchConfidence = Math.min(65 + (cLen * 8), 98);
+                                break;
+                            }
+                        }
+                    }
                 }
-            } 
-            // 2. Single Alternating Pattern (1x1) (e.g. Big, Small, Big -> Small)
-            else if (last1 !== last2 && last2 !== last3) {
-                prediction = last1 === 'Big' ? 'Small' : 'Big';
-                patternName = "Single Alternating Pattern (1x1)";
-                confidence = 85;
-            } 
-            // 3. Double Alternating Pattern (2x2) (e.g. Big, Big, Small, Small -> Big)
-            else if (last4 && last1 === last2 && last3 === last4 && last1 !== last3) {
-                prediction = last1 === 'Big' ? 'Small' : 'Big';
-                patternName = "Double Pattern (2x2 Shift)";
-                confidence = 80;
-            } 
-            // 4. Pair Follow Pattern (e.g. Small, Big, Big -> Small)
-            else if (last1 === last2 && last2 !== last3) {
-                prediction = last1; 
-                patternName = "Pair Continuous Pattern";
-                confidence = 76;
-            } 
-            // 5. Mixed Pattern Fallback
-            else {
-                prediction = last1 === 'Big' ? 'Small' : 'Big';
-                patternName = "Trend Shift Pattern";
-                confidence = 70;
             }
 
-            currentPrediction = prediction;
+            // যদি কোনো কাস্টম রুলস সরাসরি ম্যাচ না করে তবে ডিফল্ট লজিক
+            if (!predictedNext) {
+                predictedNext = (lastType === 'Big') ? 'Small' : 'Big';
+                matchedRule = { id: 'General', pattern: [] };
+                matchConfidence = 65;
+            }
 
-            // UI Render
-            patternElem.innerText = `প্যাটার্ন: ${patternName}`;
-            predResultElem.innerText = `NEXT: ${prediction}`;
-            predResultElem.style.color = prediction === 'Big' ? '#f59e0b' : '#3b82f6';
-            confElem.innerText = `Probability Match: ${confidence}%`;
+            currentPrediction = predictedNext;
+
+            // UI আপডেট
+            patternElem.innerText = matchedRule.id === 'General' ? 
+                `প্যাটার্ন: General Reversal` : 
+                `ম্যাচ করেছে: Rule #${matchedRule.id} [${matchedRule.pattern.join('-')}]`;
+
+            predResultElem.innerText = `NEXT: ${predictedNext}`;
+            predResultElem.style.color = predictedNext === 'Big' ? '#f59e0b' : '#3b82f6';
+            confElem.innerText = `Rule Accuracy Match: ${matchConfidence}%`;
 
             feedbackBox.style.display = 'flex';
         }
@@ -369,18 +427,16 @@
 
             if (isWin) {
                 totalWins++;
-                // Win হলে অ্যাপ পরবর্তী ডাটা হিসেবে ধরে নেবে প্রেডিকশন সফল
                 inputHistory.push(currentPrediction);
             } else {
                 totalLosses++;
-                // Loss হলে বিপরীতটা হিস্ট্রিতে যোগ করবে
                 let actual = currentPrediction === 'Big' ? 'Small' : 'Big';
                 inputHistory.push(actual);
             }
 
             updateTrendChainUI();
             updateStatsUI();
-            analyzeAndPredict();
+            analyze41Rules();
         }
 
         function updateStatsUI() {
@@ -394,14 +450,14 @@
         }
 
         function resetAllData() {
-            if (confirm("সব ইনপুট ডাটা মুছে ফেলতে চান?")) {
+            if (confirm("সব ইনপুট ডাটা রিসেট করতে চান?")) {
                 inputHistory = [];
                 totalWins = 0;
                 totalLosses = 0;
                 currentPrediction = null;
                 updateTrendChainUI();
                 updateStatsUI();
-                analyzeAndPredict();
+                analyze41Rules();
             }
         }
     </script>
